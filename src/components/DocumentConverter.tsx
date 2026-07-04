@@ -261,12 +261,13 @@ export default function DocumentConverter() {
   const [manualFront, setManualFront] = useState("");
   const [manualWordForm, setManualWordForm] = useState("");
   const [manualBack, setManualBack] = useState("");
-  const [manualBatch, setManualBatch] = useState<any[]>([]);
-  const [editingManualId, setEditingManualId] = useState<string | null>(null);
   const manualFrontInputRef = useRef<HTMLInputElement>(null);
   const [isGeneratingManualAi, setIsGeneratingManualAi] = useState(false);
+  const [aiAnalysisMode, setAiAnalysisMode] = useState<string | null>(null);
+  const [showAiAnalysisOverlay, setShowAiAnalysisOverlay] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "error">("saved");
 
-  const handleGenerateManualBack = async () => {
+  const handleGenerateManualBack = async (mode: string) => {
     if (!manualFront.trim()) {
       setError(
         "Vui lòng nhập Mặt trước (Từ / Khái niệm) trước khi phân tích AI!",
@@ -279,13 +280,16 @@ export default function DocumentConverter() {
       const res = await safeRequest("/api/automation/manual-define", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ front: manualFront, wordForm: manualWordForm }),
+        body: JSON.stringify({ front: manualFront, wordForm: manualWordForm, mode }),
       });
       const data = await res.json();
       if (res.ok && (data.success || data.definition)) {
         setManualBack(data.definition);
         if (data.wordForm) {
           setManualWordForm(data.wordForm);
+        }
+        if (data.front) {
+          setManualFront(data.front);
         }
         setToastSuccessMessage("AI đã phân tích thành công!");
       } else {
@@ -885,8 +889,6 @@ ${textChunk}`,
     }
   };
 
-  // Removed broken useEffect
-
   // Auto-scanning active cached session on mount
   useEffect(() => {
     setReviewPage(1);
@@ -904,11 +906,9 @@ ${textChunk}`,
           if (parsed.deckSubject !== undefined) setDeckSubject(parsed.deckSubject);
           if (parsed.isAddToExisting !== undefined) setIsAddToExisting(parsed.isAddToExisting);
           if (parsed.selectedExistingDeckId !== undefined) setSelectedExistingDeckId(parsed.selectedExistingDeckId);
-
           if (parsed.manualFront !== undefined) setManualFront(parsed.manualFront);
           if (parsed.manualWordForm !== undefined) setManualWordForm(parsed.manualWordForm);
           if (parsed.manualBack !== undefined) setManualBack(parsed.manualBack);
-          if (parsed.manualBatch !== undefined) setManualBatch(parsed.manualBatch);
           
           if (parsed.jsonPasteInput !== undefined) setJsonPasteInput(parsed.jsonPasteInput);
           if (parsed.rawTextarea !== undefined) setRawTextarea(parsed.rawTextarea);
@@ -916,7 +916,6 @@ ${textChunk}`,
             setFile(parsed.file as File);
           }
           if (parsed.uploadedFileName !== undefined) setUploadedFileName(parsed.uploadedFileName);
-
           if (parsed.extractedCards && parsed.extractedCards.length > 0) {
             setExtractedCards(parsed.extractedCards);
           }
@@ -926,6 +925,7 @@ ${textChunk}`,
           if (parsed.logs && parsed.logs.length > 0) {
             setProgressLogs(parsed.logs);
           }
+          toast.success("Restored previous session", { position: "bottom-center" });
         }
       } catch (e) {
         console.error("Failed to recover conversion cache state:", e);
@@ -936,6 +936,7 @@ ${textChunk}`,
 
   // Autosave incremental state
   useEffect(() => {
+    setSaveStatus("saving");
     const timeout = setTimeout(() => {
       PersistenceService.saveDraft({
         activeImportTab,
@@ -946,7 +947,6 @@ ${textChunk}`,
         manualFront,
         manualWordForm,
         manualBack,
-        manualBatch,
         jsonPasteInput,
         rawTextarea,
         file,
@@ -954,12 +954,16 @@ ${textChunk}`,
         extractedCards: extractedCards || [],
         activeSession,
         logs: progressLogs,
+      }).then(() => {
+        setSaveStatus("saved");
+      }).catch(() => {
+        setSaveStatus("error");
       });
     }, 500);
     return () => clearTimeout(timeout);
   }, [
     activeImportTab, deckTitle, deckSubject, isAddToExisting, selectedExistingDeckId,
-    manualFront, manualWordForm, manualBack, manualBatch, jsonPasteInput, rawTextarea,
+    manualFront, manualWordForm, manualBack, jsonPasteInput, rawTextarea,
     file, uploadedFileName, extractedCards, activeSession, progressLogs
   ]);
 
@@ -2948,68 +2952,36 @@ Hoặc dán toàn bộ đoạn văn bài đọc IELTS/TOEFL vào đây. AI sẽ 
                 </span>
               </div>
 
-              <div className="flex flex-col xl:flex-row gap-6">
+              <div className="flex flex-col items-center">
                 {/* Left side: Card Builder */}
-                <div className="flex-1">
+                <div className="w-full max-w-2xl">
                   <div
-                    className={`p-5 rounded-2xl border ${editingManualId ? "border-orange-400 bg-orange-500/5" : "border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900"} relative transition-all duration-300`}
+                    className="p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 relative transition-all duration-300"
                   >
                     <div className="flex justify-between items-center mb-4">
                       <h5 className="font-bold text-sm flex items-center gap-1.5">
-                        <Plus
-                          className={`w-4 h-4 ${editingManualId ? "text-orange-500" : "text-orange-500"}`}
-                        />
-                        {editingManualId
-                          ? "Cập Nhật Thông Tin Thẻ"
-                          : "Thêm Thông Tin Thẻ"}
+                        <Plus className="w-4 h-4 text-orange-500" />
+                        Thêm Thông Tin Thẻ
                       </h5>
-                      {editingManualId && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingManualId(null);
-                            setManualFront("");
-                            setManualWordForm("");
-                            setManualBack("");
-                            manualFrontInputRef.current?.focus();
-                          }}
-                          className="flex items-center gap-1 px-2 py-1 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-[10px] font-bold rounded-md transition"
-                        >
-                          <X className="w-3 h-3" /> Bỏ qua
-                        </button>
-                      )}
                     </div>
-
                     <form
                       onSubmit={(e) => {
                         e.preventDefault();
                         if (!manualFront.trim() || !manualBack.trim()) return;
-
-                        if (editingManualId) {
-                          setManualBatch((prev) =>
-                            prev.map((c) =>
-                              c.id === editingManualId
-                                ? {
-                                    ...c,
-                                    front: manualFront.trim(),
-                                    wordForm: manualWordForm.trim(),
-                                    back: manualBack.trim(),
-                                  }
-                                : c,
-                            ),
-                          );
-                          setEditingManualId(null);
-                        } else {
-                          setManualBatch((prev) => [
-                            ...prev,
-                            {
-                              id: `manual_${uuidv4()}`,
-                              front: manualFront.trim(),
-                              wordForm: manualWordForm.trim(),
-                              back: manualBack.trim(),
-                            },
-                          ]);
-                        }
+                        
+                        setExtractedCards((prev) => [
+                          ...(prev || []),
+                          {
+                            id: `card_${uuidv4()}`,
+                            front: manualFront.trim(),
+                            wordForm: manualWordForm.trim(),
+                            back: manualBack.trim(),
+                            ipa: "",
+                            example: "",
+                          },
+                        ]);
+                        setSuccessCount((prev) => prev + 1);
+                        toast.success("Đã thêm vào Grid thành công!", { position: "bottom-center" });
 
                         setManualFront("");
                         setManualWordForm("");
@@ -3057,16 +3029,16 @@ Hoặc dán toàn bộ đoạn văn bài đọc IELTS/TOEFL vào đây. AI sẽ 
                           <button
                             type="button"
                             onClick={() => {
-                              if (isUserAdminOrTeacher) {
-                                handleGenerateManualBack();
+                              if (!aiAnalysisMode) {
+                                setShowAiAnalysisOverlay(true);
                               } else {
-                                setShowApiDownOverlay(true);
+                                handleGenerateManualBack(aiAnalysisMode);
                               }
                             }}
                             disabled={
                               isGeneratingManualAi || !manualFront.trim()
                             }
-                            className="px-2 py-1 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold text-[10px] rounded flex items-center gap-1 transition disabled:opacity-50"
+                            className="px-2 py-1 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold text-[10px] rounded flex items-center gap-1 transition disabled:opacity-50 relative z-0"
                           >
                             {isGeneratingManualAi ? (
                               <Loader2 className="w-3 h-3 animate-spin" />
@@ -3076,38 +3048,80 @@ Hoặc dán toàn bộ đoạn văn bài đọc IELTS/TOEFL vào đây. AI sẽ 
                             AI Phân Tích
                           </button>
                         </div>
-                        <textarea
-                          rows={3}
-                          className="w-full p-3 bg-white dark:bg-black/40 border border-zinc-200 dark:border-zinc-700 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/50 transition resize-none text-sm leading-relaxed"
-                          placeholder="Giải thích chi tiết, ý nghĩa, ví dụ..."
-                          value={manualBack}
-                          onChange={(e) => setManualBack(e.target.value)}
-                          required
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" && !e.shiftKey) {
-                              e.preventDefault();
-                              if (manualFront.trim() && manualBack.trim()) {
-                                e.currentTarget.form?.dispatchEvent(
-                                  new Event("submit", {
-                                    cancelable: true,
-                                    bubbles: true,
-                                  }),
-                                );
+                        <div className="relative">
+                          <textarea
+                            rows={3}
+                            className="w-full p-3 bg-white dark:bg-black/40 border border-zinc-200 dark:border-zinc-700 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/50 transition resize-none text-sm leading-relaxed relative z-0"
+                            placeholder="Giải thích chi tiết, ý nghĩa, ví dụ..."
+                            value={manualBack}
+                            onChange={(e) => setManualBack(e.target.value)}
+                            required
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                if (manualFront.trim() && manualBack.trim()) {
+                                  e.currentTarget.form?.dispatchEvent(
+                                    new Event("submit", {
+                                      cancelable: true,
+                                      bubbles: true,
+                                    }),
+                                  );
+                                }
                               }
-                            }
-                          }}
-                        />
+                            }}
+                          />
+                          <AnimatePresence>
+                            {showAiAnalysisOverlay && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="absolute inset-0 z-10 bg-white/80 dark:bg-black/80 backdrop-blur-md rounded-xl flex flex-col p-2 gap-2 overflow-y-auto shadow-lg border border-zinc-200 dark:border-zinc-700"
+                              >
+                                <div className="flex justify-between items-center mb-1 px-1">
+                                  <span className="text-[10px] font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider">Chọn chế độ phân tích</span>
+                                  <button type="button" onClick={() => setShowAiAnalysisOverlay(false)} className="text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition">
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2 flex-1">
+                                  <button type="button" onClick={() => { setAiAnalysisMode('vocab'); setShowAiAnalysisOverlay(false); handleGenerateManualBack('vocab'); }} className="text-left px-2 py-1.5 text-xs bg-white dark:bg-zinc-800/80 rounded-lg shadow-sm border border-zinc-200/50 dark:border-zinc-700/50 hover:border-orange-500 hover:shadow-md transition group">
+                                    <span className="font-bold text-orange-600 dark:text-orange-400 block group-hover:scale-105 transform origin-left transition">Từ vựng (EN)</span>
+                                    <span className="text-[9px] text-zinc-500 dark:text-zinc-400 leading-tight block mt-0.5">Nghĩa sâu, IPA, ví dụ...</span>
+                                  </button>
+                                  <button type="button" onClick={() => { setAiAnalysisMode('error_correction'); setShowAiAnalysisOverlay(false); handleGenerateManualBack('error_correction'); }} className="text-left px-2 py-1.5 text-xs bg-white dark:bg-zinc-800/80 rounded-lg shadow-sm border border-zinc-200/50 dark:border-zinc-700/50 hover:border-blue-500 hover:shadow-md transition group">
+                                    <span className="font-bold text-blue-600 dark:text-blue-400 block group-hover:scale-105 transform origin-left transition">Sửa lỗi sai (EN)</span>
+                                    <span className="text-[9px] text-zinc-500 dark:text-zinc-400 leading-tight block mt-0.5">Chỉ ra lỗi & giải thích</span>
+                                  </button>
+                                  <button type="button" onClick={() => { setAiAnalysisMode('confusing_words'); setShowAiAnalysisOverlay(false); handleGenerateManualBack('confusing_words'); }} className="text-left px-2 py-1.5 text-xs bg-white dark:bg-zinc-800/80 rounded-lg shadow-sm border border-zinc-200/50 dark:border-zinc-700/50 hover:border-purple-500 hover:shadow-md transition group">
+                                    <span className="font-bold text-purple-600 dark:text-purple-400 block group-hover:scale-105 transform origin-left transition">Phân biệt từ (EN)</span>
+                                    <span className="text-[9px] text-zinc-500 dark:text-zinc-400 leading-tight block mt-0.5">So sánh điểm khác biệt</span>
+                                  </button>
+                                  <button type="button" onClick={() => { setAiAnalysisMode('other_subjects'); setShowAiAnalysisOverlay(false); handleGenerateManualBack('other_subjects'); }} className="text-left px-2 py-1.5 text-xs bg-white dark:bg-zinc-800/80 rounded-lg shadow-sm border border-zinc-200/50 dark:border-zinc-700/50 hover:border-emerald-500 hover:shadow-md transition group">
+                                    <span className="font-bold text-emerald-600 dark:text-emerald-400 block group-hover:scale-105 transform origin-left transition">Môn học khác</span>
+                                    <span className="text-[9px] text-zinc-500 dark:text-zinc-400 leading-tight block mt-0.5">Toán, Lý, Văn (Unicode)</span>
+                                  </button>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
                       </div>
 
-                      <div className="flex justify-end pt-1">
+                      <div className="flex justify-between items-center pt-1 w-full">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-1.5">
+                            {saveStatus === "saving" && <><Loader2 className="w-3 h-3 animate-spin text-orange-500" /> Saving...</>}
+                            {saveStatus === "saved" && <><Check className="w-3 h-3 text-green-500" /> Saved</>}
+                            {saveStatus === "error" && <><AlertTriangle className="w-3 h-3 text-red-500" /> Save failed</>}
+                          </span>
+                        </div>
                         <button
                           type="submit"
                           disabled={!manualFront.trim() || !manualBack.trim()}
-                          className={`px-4 py-2 font-bold text-xs rounded-xl transition flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95 duration-200
-                             ${editingManualId ? "bg-orange-500 hover:bg-orange-600 text-white" : "bg-zinc-800 hover:bg-black dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-black"}
-                           `}
+                          className="px-4 py-2 font-bold text-xs rounded-xl transition flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95 duration-200 bg-orange-500 hover:bg-orange-600 text-white"
                         >
-                          {editingManualId ? "Cập Nhật" : "Thêm Vào Batch"}
+                          Add to Grid
                           <kbd className="hidden sm:inline-block ml-1 px-1.5 py-0.5 bg-white/20 dark:bg-black/20 rounded font-mono text-[9px] shadow-sm text-inherit">
                             Enter
                           </kbd>
@@ -3115,139 +3129,6 @@ Hoặc dán toàn bộ đoạn văn bài đọc IELTS/TOEFL vào đây. AI sẽ 
                       </div>
                     </form>
                   </div>
-                </div>
-
-                {/* Right side: Batch List */}
-                <div className="w-full xl:w-72 2xl:w-80 flex flex-col pt-3 xl:pt-0">
-                  <div className="flex items-center justify-between mb-3 border-b border-zinc-200 dark:border-zinc-800 pb-2">
-                    <h5 className="font-bold text-xs tracking-wide opacity-80 uppercase">
-                      Danh sách chờ lưu
-                    </h5>
-                    <div className="px-2 py-0.5 bg-orange-500/20 text-orange-700 dark:text-orange-400 font-bold rounded-lg text-[10px]">
-                      {manualBatch.length} Thẻ
-                    </div>
-                  </div>
-
-                  <div className="flex-1 bg-zinc-50 dark:bg-zinc-900/60 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-y-auto max-h-[300px] xl:max-h-[380px] p-2 space-y-2 scrollbar-thin">
-                    {manualBatch.length === 0 ? (
-                      <div className="h-full flex flex-col items-center justify-center opacity-30 text-center py-8">
-                        <Layers className="w-8 h-8 mb-2 opacity-50" />
-                        <p className="text-xs font-bold">Trống</p>
-                        <p className="text-[10px] mt-1 px-4">
-                          Hãy điền form bên trái để thêm thẻ
-                        </p>
-                      </div>
-                    ) : (
-                      manualBatch.map((card, idx) => (
-                        <div
-                          key={`${card.id || "card"}-${idx}`}
-                          className={`p-2.5 bg-white dark:bg-zinc-900 rounded-lg group transition-colors relative ${
-                            editingManualId === card.id
-                              ? "border border-orange-400 shadow-sm"
-                              : "border border-zinc-200 dark:border-zinc-800 hover:border-orange-500/50"
-                          }`}
-                        >
-                          <div className="flex justify-between items-start gap-2">
-                            <div className="flex-1 min-w-0 pr-1">
-                              <div className="flex items-center gap-1 mb-1">
-                                <span className="text-[9px] font-bold opacity-40">
-                                  #{idx + 1}
-                                </span>
-                                {editingManualId === card.id && (
-                                  <span className="text-[9px] text-orange-500 font-bold">
-                                    (Đang sửa)
-                                  </span>
-                                )}
-                              </div>
-                              <h6 className="font-bold text-xs line-clamp-1">
-                                {card.front}{" "}
-                                {card.wordForm && (
-                                  <span className="opacity-50 font-normal italic">
-                                    ({card.wordForm})
-                                  </span>
-                                )}
-                              </h6>
-                              <p className="text-[10px] opacity-70 line-clamp-2 mt-0.5 leading-snug">
-                                {card.back}
-                              </p>
-                            </div>
-
-                            <div
-                              className={`flex flex-col gap-1 transition-opacity opacity-100`}
-                            >
-                              <button
-                                onClick={() => {
-                                  setManualFront(card.front);
-                                  setManualWordForm(card.wordForm || "");
-                                  setManualBack(card.back || "");
-                                  setEditingManualId(card.id);
-                                  manualFrontInputRef.current?.focus();
-                                }}
-                                className="p-1.5 rounded transition bg-orange-500/10 hover:bg-orange-500 text-orange-600 hover:text-white"
-                              >
-                                <Edit3 className="w-3 h-3" />
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setManualBatch((prev) =>
-                                    prev.filter((c) => c.id !== card.id),
-                                  );
-                                  if (editingManualId === card.id) {
-                                    setEditingManualId(null);
-                                    setManualFront("");
-                                    setManualWordForm("");
-                                    setManualBack("");
-                                  }
-                                }}
-                                className="p-1.5 rounded transition bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (manualBatch.length === 0) return;
-                      setIsProcessing(true);
-                      setError(null);
-                      setProgressText("Đang nạp dữ liệu thủ công...");
-
-                      setTimeout(() => {
-                        const mapped = manualBatch.map((card) => ({
-                          ...card,
-                          wordForm: card.wordForm || "",
-                          ipa: "",
-                          example: "",
-                        }));
-                        setExtractedCards(mapped);
-                        setSuccessCount(mapped.length);
-                        pushLog(
-                          `🎉 Đã nạp thành công ${mapped.length} thẻ học phần do ngài vừa nhập thủ công.`,
-                        );
-                        setIsProcessing(false);
-                        setProgressText("");
-                      }, 400); // slight delay for effect
-                    }}
-                    disabled={
-                      manualBatch.length === 0 ||
-                      isProcessing ||
-                      editingManualId !== null
-                    }
-                    className="mt-3 w-full py-2.5 px-4 bg-orange-500 hover:bg-orange-600 text-zinc-950 font-bold text-xs rounded-xl transition shadow-sm active:scale-95 disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-1.5"
-                  >
-                    {isProcessing ? (
-                      <Zap className="w-3.5 h-3.5 animate-pulse" />
-                    ) : (
-                      <Save className="w-3.5 h-3.5" />
-                    )}
-                    Nạp vào Grid ({manualBatch.length} thẻ)
-                  </button>
                 </div>
               </div>
             </div>
@@ -3529,7 +3410,7 @@ Hoặc dán toàn bộ đoạn văn bài đọc IELTS/TOEFL vào đây. AI sẽ 
           </div>
 
           {/* Conversion master execution triggers */}
-          {activeImportTab !== "json" && (
+          {activeImportTab !== "json" && activeImportTab !== "manual" && (
             <button
               onClick={onConvertClick}
               disabled={
@@ -3765,8 +3646,28 @@ Hoặc dán toàn bộ đoạn văn bài đọc IELTS/TOEFL vào đây. AI sẽ 
                   lưu.
                 </p>
               </div>
-              <button
-                onClick={handleSaveDeck}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setExtractedCards(null);
+                    setManualFront("");
+                    setManualWordForm("");
+                    setManualBack("");
+                    setJsonPasteInput("");
+                    setRawTextarea("");
+                    setFile(null);
+                    setUploadedFileName("");
+                    setProgressLogs([]);
+                    PersistenceService.deleteDraft().catch(console.error);
+                    toast.success("Đã xoá bản nháp Grid và khởi tạo lại UI.", { position: "bottom-center" });
+                  }}
+                  className="btn-3d px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white font-black rounded-xl cursor-pointer hover:shadow transition text-xs shrink-0 flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-4 h-4" /> Delete Draft
+                </button>
+                <button
+                  onClick={handleSaveDeck}
                 disabled={
                   isProcessing || (isAddToExisting && !selectedExistingDeckId)
                 }
@@ -3774,6 +3675,7 @@ Hoặc dán toàn bộ đoạn văn bài đọc IELTS/TOEFL vào đây. AI sẽ 
               >
                 🔑 Lưu Học Phần Vào Thư Viện
               </button>
+              </div>
             </div>
 
             {/* Pagination Controls bar */}

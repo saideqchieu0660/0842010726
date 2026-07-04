@@ -129,6 +129,7 @@ import { InteractiveTutorial } from "../components/InteractiveTutorial";
 import { EditDeckModal } from "../components/EditDeckModal";
 
 import { DeckList } from "../components/DeckList";
+import { HomeLibrary } from "../components/HomeLibrary";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { ExportStudyReport } from "../components/ExportStudyReport";
 import { useAICooldown, triggerAICooldown } from "../lib/cooldown";
@@ -3409,10 +3410,8 @@ export default function StudentDashboard() {
               />
             ) : (
               <div className="glass p-4 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50 animate-in fade-in duration-300">
-                <DeckList
+                <HomeLibrary
                   decks={decks}
-                  showSearch={true}
-                  groupBySubject={true}
                   onCategoryQuiz={(subject, subjectDecks) =>
                     setActiveQuizSetup({ subject, decks: subjectDecks })
                   }
@@ -3738,15 +3737,8 @@ export default function StudentDashboard() {
           </div>
 
           <div className="glass p-6 md:p-8 rounded-3xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white/40 dark:bg-black/40 backdrop-blur-xl shadow-xl">
-            <DeckList
+            <HomeLibrary
               decks={decks}
-              showSearch={true}
-              groupBySubject={true}
-              onCategoryQuiz={(subject, subjectDecks) =>
-                setActiveQuizSetup({ subject, decks: subjectDecks })
-              }
-              onCategoryReviewHardCards={startCategoryUnknownStudy}
-              onCategoryStudyAll={startCategoryStudyAll}
               isAdmin={
                 user?.role === "admin" ||
                 user?.role === "Admin" ||
@@ -3763,6 +3755,11 @@ export default function StudentDashboard() {
                   subject: deck.subject || "Tự chọn",
                 })
               }
+              onCategoryQuiz={(subject, subjectDecks) =>
+                setActiveQuizSetup({ subject, decks: subjectDecks })
+              }
+              onCategoryReviewHardCards={startCategoryUnknownStudy}
+              onCategoryStudyAll={startCategoryStudyAll}
             />
           </div>
         </motion.div>

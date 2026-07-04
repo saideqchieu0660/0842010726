@@ -785,10 +785,10 @@ export interface ProviderConfig {
 }
 
 export let apiProviderConfig: ProviderConfig = {
-  openRouter: true,
+  openRouter: false, // LEGACY DISABLED
   gemini: true,
   groq: true,
-  deepInfra: true
+  deepInfra: false // LEGACY DISABLED
 };
 
 try {
@@ -801,6 +801,10 @@ try {
 }
 
 export function updateApiProviderConfig(newConfig: Partial<ProviderConfig>) {
+  // Enforce legacy disable
+  if (newConfig.openRouter !== undefined) newConfig.openRouter = false;
+  if (newConfig.deepInfra !== undefined) newConfig.deepInfra = false;
+  
   apiProviderConfig = { ...apiProviderConfig, ...newConfig };
   try {
     localStorage.setItem("henosis_provider_config", JSON.stringify(apiProviderConfig));
@@ -829,10 +833,10 @@ async function syncProviderToggles() {
     if (res.ok) {
       const data = await res.json();
       updateApiProviderConfig({
-        openRouter: data.openRouterEnabled !== false,
+        openRouter: false, // LEGACY DISABLED
         gemini: data.geminiEnabled !== false,
         groq: data.groqEnabled !== false,
-        deepInfra: data.deepInfraEnabled !== false
+        deepInfra: false // LEGACY DISABLED
       });
       console.log("[apiClient] Automatically synchronized active provider toggles from server:", apiProviderConfig);
     }
@@ -1287,7 +1291,12 @@ async function fetchOpenRouterDirect(apiKey: string, model: string, messages: an
         throw lastError;
       }
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        throw new Error(`Invalid JSON response from OpenRouter. Status: ${response.status}`);
+      }
       const content = data?.choices?.[0]?.message?.content;
       if (!content) throw new Error("Empty content returned from OpenRouter direct endpoint.");
       return content;
@@ -1374,7 +1383,12 @@ async function fetchGeminiDirect(apiKey: string, messages: any[], isJsonExpected
       throw new Error(`Gemini Direct failure: ${response.status} - ${errText}`);
     }
 
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      throw new Error(`Invalid JSON response from Gemini. Status: ${response.status}`);
+    }
     const content = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!content) throw new Error("Empty content returned from Gemini direct endpoint.");
     return content;

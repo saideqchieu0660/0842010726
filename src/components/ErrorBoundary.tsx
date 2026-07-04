@@ -27,6 +27,12 @@ export class ErrorBoundary extends Component<Props, State> {
     console.error("Uncaught error:", error, errorInfo);
     this.setState({ errorInfo });
 
+    fetch('/api/log-error', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: error.message, componentStack: errorInfo.componentStack })
+    }).catch(console.error);
+
     // Check if it is a dynamic import or chunk load failure
     const errorMessage = error?.message || "";
     const isChunkError = 

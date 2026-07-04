@@ -20,6 +20,8 @@ export class CerebrasRotator {
       promptText = contents;
     } else if (Array.isArray(contents)) {
       promptText = contents.map(c => {
+         if (typeof c === "string") return c;
+         if (c.parts) return c.parts.map(p => p.text || "[Media]").join("\n");
          if (c.text) return c.text;
          if (c.inlineData) return "[Image data attached - Supported on Gemini only]";
          return JSON.stringify(c);
@@ -100,6 +102,8 @@ export class CerebrasRotator {
       promptText = contents;
     } else if (Array.isArray(contents)) {
       promptText = contents.map(c => {
+         if (typeof c === "string") return c;
+         if (c.parts) return c.parts.map(p => p.text || "[Media]").join("\n");
          if (c.text) return c.text;
          if (c.inlineData) return "[Image data attached - Supported on Gemini only]";
          return JSON.stringify(c);

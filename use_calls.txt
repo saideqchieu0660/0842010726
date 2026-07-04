@@ -1,0 +1,980 @@
+src/components/Agent3Widget.tsx:1:import React, { useState, useRef, useEffect, useCallback , useMemo } from "react";
+src/components/Agent3Widget.tsx:10:import { useAICooldown } from "../lib/cooldown";
+src/components/Agent3Widget.tsx:38:  const [isOpen, setIsOpen] = useState(false);
+src/components/Agent3Widget.tsx:39:  const [isMaximized, setIsMaximized] = useState(false);
+src/components/Agent3Widget.tsx:40:  const [messages, setMessages] = useState<{role: "user"|"ai", text: string}[]>([]);
+src/components/Agent3Widget.tsx:42:  useEffect(() => {
+src/components/Agent3Widget.tsx:50:  /* Ký sinh đè lên useEffect gốc bằng cách comment out
+src/components/Agent3Widget.tsx:51:  useEffect(() => {
+src/components/Agent3Widget.tsx:55:  const [input, setInput] = useState("");
+src/components/Agent3Widget.tsx:56:  const [isLoading, setIsLoading] = useState(false);
+src/components/Agent3Widget.tsx:57:  const [sessionId] = useState(() => uuidv4());
+src/components/Agent3Widget.tsx:58:  const [responseMode, setResponseMode] = useState<"socratic" | "direct" | "debate" | "auto">(() => {
+src/components/Agent3Widget.tsx:61:  const [responseLength, setResponseLength] = useState<"concise" | "detailed" | "super_detailed">(() => {
+src/components/Agent3Widget.tsx:64:  const [showSettings, setShowSettings] = useState(false);
+src/components/Agent3Widget.tsx:85:  const [existingSets, setExistingSets] = useState<any[]>([]);
+src/components/Agent3Widget.tsx:86:  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+src/components/Agent3Widget.tsx:87:  const [editingCard, setEditingCard] = useState({ front: "", back: "", ipa: "", example: "" });
+src/components/Agent3Widget.tsx:88:  const [selectedSetId, setSelectedSetId] = useState("");
+src/components/Agent3Widget.tsx:89:  const [savingCard, setSavingCard] = useState(false);
+src/components/Agent3Widget.tsx:90:  const [saveSuccessMsg, setSaveSuccessMsg] = useState("");
+src/components/Agent3Widget.tsx:91:  const [saveErrorMsg, setSaveErrorMsg] = useState("");
+src/components/Agent3Widget.tsx:93:  const [isCreateNewSet, setIsCreateNewSet] = useState(false);
+src/components/Agent3Widget.tsx:94:  const [newSetTitle, setNewSetTitle] = useState("");
+src/components/Agent3Widget.tsx:95:  const [newSetSubject, setNewSetSubject] = useState("");
+src/components/Agent3Widget.tsx:96:  const [searchQuery, setSearchQuery] = useState("");
+src/components/Agent3Widget.tsx:97:  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+src/components/Agent3Widget.tsx:101:  useEffect(() => {
+src/components/Agent3Widget.tsx:330:  const [agentLimits, setAgentLimits] = useState<{ remaining: number; cooldownRemaining: number; limitUsedToday: number; limitMax: number } | null>(null);
+src/components/Agent3Widget.tsx:351:  useEffect(() => {
+src/components/Agent3Widget.tsx:357:  const { cooldownRemaining, startCooldown } = useAICooldown(user);
+src/components/Agent3Widget.tsx:359:  const messagesEndRef = useRef<HTMLDivElement>(null);
+src/components/Agent3Widget.tsx:361:  useEffect(() => {
+src/components/Agent3Widget.tsx:476:  useEffect(() => {
+src/components/Agent3Widget.tsx:1313:  const [activeTab, setActiveTab] = React.useState<"interactive" | "image" | "code">("image");
+src/components/Agent3Widget.tsx:1314:  const [copied, setCopied] = React.useState(false);
+src/components/Agent3Widget.tsx:1315:  const [imageError, setImageError] = React.useState(false);
+src/components/Agent3Widget.tsx:1318:  const parsedRoot = useMemo(() => {
+src/components/Agent3Widget.tsx:1328:  const imageUrl = useMemo(() => {
+src/components/StreakDisplay.tsx:1:import { useState } from "react";
+src/components/StreakDisplay.tsx:21:  const [showChart, setShowChart] = useState(false);
+src/components/StreakDisplay.tsx:31:    <div className="relative" onMouseEnter={() => setShowChart(true)} onMouseLeave={() => setShowChart(false)}>
+src/components/AutoRefreshBadge.tsx:1:import React, { useState, useEffect } from "react";
+src/components/AutoRefreshBadge.tsx:6:  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+src/components/AutoRefreshBadge.tsx:7:  const [isDisabled, setIsDisabled] = useState(false);
+src/components/AutoRefreshBadge.tsx:8:  const [isRefreshing, setIsRefreshing] = useState(false);
+src/components/AutoRefreshBadge.tsx:10:  useEffect(() => {
+src/components/CustomCursor.tsx:1:import { useEffect, useState } from 'react';
+src/components/CustomCursor.tsx:2:import { motion, useMotionValue, useSpring } from 'motion/react';
+src/components/CustomCursor.tsx:3:import { useTheme } from './ThemeProvider';
+src/components/CustomCursor.tsx:6:  const { isFixLagEnabled } = useTheme();
+src/components/CustomCursor.tsx:7:  const [isHovering, setIsHovering] = useState(false);
+src/components/CustomCursor.tsx:8:  const cursorX = useMotionValue(-100);
+src/components/CustomCursor.tsx:9:  const cursorY = useMotionValue(-100);
+src/components/CustomCursor.tsx:12:  const cursorXSpring = useSpring(cursorX, springConfig);
+src/components/CustomCursor.tsx:13:  const cursorYSpring = useSpring(cursorY, springConfig);
+src/components/CustomCursor.tsx:15:  useEffect(() => {
+src/components/CustomCursor.tsx:18:    const moveCursor = (e: MouseEvent) => {
+src/components/CustomCursor.tsx:23:    const handleMouseOver = (e: MouseEvent) => {
+src/components/CustomCursor.tsx:40:    window.addEventListener('mouseover', handleMouseOver);
+src/components/CustomCursor.tsx:44:      window.removeEventListener('mouseover', handleMouseOver);
+src/components/MasteryHeatmap.tsx:1:import React, { useEffect, useRef } from 'react';
+src/components/MasteryHeatmap.tsx:3:import { useTheme } from './ThemeProvider';
+src/components/MasteryHeatmap.tsx:16:  const containerRef = useRef<HTMLDivElement>(null);
+src/components/MasteryHeatmap.tsx:17:  const { theme } = useTheme();
+src/components/MasteryHeatmap.tsx:19:  useEffect(() => {
+src/components/Breadcrumbs.tsx:2:import { Link, useLocation } from "react-router-dom";
+src/components/Breadcrumbs.tsx:7:  const location = useLocation();
+src/components/OnboardingTour.tsx:1:import React, { useState, useEffect } from "react";
+src/components/OnboardingTour.tsx:32:  const [currentStep, setCurrentStep] = useState(0);
+src/components/OnboardingTour.tsx:33:  const [isVisible, setIsVisible] = useState(false);
+src/components/OnboardingTour.tsx:35:  useEffect(() => {
+src/components/AudioVisualizer.tsx:1:import React, { useEffect, useRef } from 'react';
+src/components/AudioVisualizer.tsx:3:import { useTheme } from './ThemeProvider';
+src/components/AudioVisualizer.tsx:6:  const canvasRef = useRef<HTMLCanvasElement>(null);
+src/components/AudioVisualizer.tsx:7:  const { isFixLagEnabled } = useTheme();
+src/components/AudioVisualizer.tsx:9:  useEffect(() => {
+src/components/DeepWorkTimer.tsx:1:import React, { useState, useEffect } from 'react';
+src/components/DeepWorkTimer.tsx:4:import { useLocation } from 'react-router-dom';
+src/components/DeepWorkTimer.tsx:7:    const [isEnabled, setIsEnabled] = useState(localStorage.getItem('henosis_deepwork') === 'true');
+src/components/DeepWorkTimer.tsx:8:    const [mode, setMode] = useState<'work' | 'break'>('work');
+src/components/DeepWorkTimer.tsx:9:    const [timeLeft, setTimeLeft] = useState(25 * 60); // 25 mins by default
+src/components/DeepWorkTimer.tsx:10:    const [isActive, setIsActive] = useState(false);
+src/components/DeepWorkTimer.tsx:11:    const [isBreakLocked, setIsBreakLocked] = useState(false);
+src/components/DeepWorkTimer.tsx:12:    const location = useLocation();
+src/components/DeepWorkTimer.tsx:18:    useEffect(() => {
+src/components/DeepWorkTimer.tsx:33:    useEffect(() => {
+src/components/MasteryBubbleChart.tsx:1:import React, { useRef, useEffect } from 'react';
+src/components/MasteryBubbleChart.tsx:12:  const d3Container = useRef<SVGSVGElement | null>(null);
+src/components/MasteryBubbleChart.tsx:14:  useEffect(() => {
+src/components/EditDeckModal.tsx:1:import React, { useState, useEffect } from 'react';
+src/components/EditDeckModal.tsx:23:  const [title, setTitle] = useState(initialTitle);
+src/components/EditDeckModal.tsx:24:  const [subject, setSubject] = useState(initialSubject);
+src/components/EditDeckModal.tsx:25:  const [isSaving, setIsSaving] = useState(false);
+src/components/EditDeckModal.tsx:27:  useEffect(() => {
+src/components/HierarchicalCategoryNode.tsx:1:import React, { useState, useRef } from 'react';
+src/components/CustomDeckSelect.tsx:1:import React, { useState, useRef, useEffect } from 'react';
+src/components/CustomDeckSelect.tsx:14:  const [isOpen, setIsOpen] = useState(false);
+src/components/CustomDeckSelect.tsx:15:  const [expandedSubject, setExpandedSubject] = useState<string | null>(null);
+src/components/CustomDeckSelect.tsx:16:  const dropdownRef = useRef<HTMLDivElement>(null);
+src/components/CustomDeckSelect.tsx:18:  useEffect(() => {
+src/components/CustomDeckSelect.tsx:19:    const handleClickOutside = (event: MouseEvent) => {
+src/components/VirtualizedFlashcardList.tsx:1:import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+src/components/VirtualizedFlashcardList.tsx:29:  const [confirmingDelete, setConfirmingDelete] = useState(false);
+src/components/VirtualizedFlashcardList.tsx:32:  useEffect(() => {
+src/components/VirtualizedFlashcardList.tsx:136:  const containerRef = useRef<HTMLDivElement>(null);
+src/components/VirtualizedFlashcardList.tsx:137:  const [scrollTop, setScrollTop] = useState(0);
+src/components/VirtualizedFlashcardList.tsx:138:  const [containerHeight, setContainerHeight] = useState(320); // max-h-80 is 320px
+src/components/VirtualizedFlashcardList.tsx:140:  useEffect(() => {
+src/components/VirtualizedFlashcardList.tsx:174:  const { totalHeight, visibleItems, startOffset } = useMemo(() => {
+src/components/StudentBadges.tsx:1:import React, { useState, useEffect, useRef } from "react";
+src/components/StudentBadges.tsx:507:  const [isFlipped, setIsFlipped] = useState(false);
+src/components/StudentBadges.tsx:510:  const handleDownload = async (e: React.MouseEvent) => {
+src/components/StudentBadges.tsx:528:      onMouseEnter={() => setIsFlipped(true)}
+src/components/StudentBadges.tsx:529:      onMouseLeave={() => setIsFlipped(false)}
+src/components/StudentBadges.tsx:729:  const [selectedCategory, setSelectedCategory] = useState<
+src/components/StudentBadges.tsx:732:  const unlockedIdsRef = useRef<string[]>([]);
+src/components/StudentBadges.tsx:733:  const [unlockedIdsStore, setUnlockedIdsStore] = useState<string[]>([]);
+src/components/StudentBadges.tsx:734:  const [newlyUnlocked, setNewlyUnlocked] = useState<(typeof BADGES)[0] | null>(
+src/components/StudentBadges.tsx:737:  const [showExportView, setShowExportView] = useState(false);
+src/components/StudentBadges.tsx:738:  const isFirstRender = useRef(true);
+src/components/StudentBadges.tsx:757:  useEffect(() => {
+src/components/FlashcardViewer.tsx:1:import React, { useState, useEffect, useCallback, useRef } from "react";
+src/components/FlashcardViewer.tsx:28:  const [currentCardIndex, setCurrentCardIndex] = useState<number>(-1);
+src/components/FlashcardViewer.tsx:29:  const [toastMessage, setToastMessage] = useState<string | null>(null);
+src/components/FlashcardViewer.tsx:30:  const [isClozeMode, setIsClozeMode] = useState(false);
+src/components/FlashcardViewer.tsx:31:  const [isFlipped, setIsFlipped] = useState(false);
+src/components/FlashcardViewer.tsx:32:  const [isHintRevealed, setIsHintRevealed] = useState(false);
+src/components/FlashcardViewer.tsx:33:  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+src/components/FlashcardViewer.tsx:36:  useEffect(() => {
+src/components/FlashcardViewer.tsx:41:  useEffect(() => {
+src/components/FlashcardViewer.tsx:71:  useEffect(() => {
+src/components/FlashcardViewer.tsx:97:  const syncIndexToFirestore = useCallback((index: number) => {
+src/components/FlashcardViewer.tsx:112:  useEffect(() => {
+src/components/DeckList.tsx:1:import React, { useState, useMemo, useRef, useEffect, useContext } from 'react';
+src/components/DeckList.tsx:2:import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'motion/react';
+src/components/DeckList.tsx:7:import { useTheme } from '../components/ThemeProvider';
+src/components/DeckList.tsx:23:  const [isExpanded, setIsExpanded] = useState(true);
+src/components/DeckList.tsx:31:  } = useContext(DeckListContext);
+src/components/DeckList.tsx:33:  const scrollContainerRef = useRef<HTMLDivElement>(null);
+src/components/DeckList.tsx:46:  const allDecksInTree = useMemo(() => getAllDecks(node), [node]);
+src/components/DeckList.tsx:293:  const ref = useRef<HTMLDivElement>(null);
+src/components/DeckList.tsx:294:  const x = useMotionValue(0);
+src/components/DeckList.tsx:295:  const y = useMotionValue(0);
+src/components/DeckList.tsx:296:  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 });
+src/components/DeckList.tsx:297:  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 });
+src/components/DeckList.tsx:299:  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["10deg", "-10deg"]);
+src/components/DeckList.tsx:300:  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-10deg", "10deg"]);
+src/components/DeckList.tsx:302:  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+src/components/DeckList.tsx:307:    const mouseX = e.clientX - rect.left;
+src/components/DeckList.tsx:308:    const mouseY = e.clientY - rect.top;
+src/components/DeckList.tsx:309:    x.set(mouseX / width - 0.5);
+src/components/DeckList.tsx:310:    y.set(mouseY / height - 0.5);
+src/components/DeckList.tsx:313:  const handleMouseLeave = () => {
+src/components/DeckList.tsx:318:  const { theme, isFixLagEnabled } = useTheme();
+src/components/DeckList.tsx:336:      onMouseMove={handleMouseMove}
+src/components/DeckList.tsx:337:      onMouseLeave={handleMouseLeave}
+src/components/DeckList.tsx:354:  const [pinnedDecks, setPinnedDecks] = useState<string[]>(() => {
+src/components/DeckList.tsx:359:  const [isOnline, setIsOnline] = useState(navigator.onLine);
+src/components/DeckList.tsx:360:  const [offlineDeckIds, setOfflineDeckIds] = useState<Set<string>>(new Set());
+src/components/DeckList.tsx:361:  const [downloadingDecks, setDownloadingDecks] = useState<Set<string>>(new Set());
+src/components/DeckList.tsx:363:  useEffect(() => {
+src/components/DeckList.tsx:385:  const handleDownloadOffline = async (e: React.MouseEvent, deckId: string) => {
+src/components/DeckList.tsx:435:  const [editingCategory, setEditingCategory] = useState<string | null>(null);
+src/components/DeckList.tsx:436:  const [newCategoryName, setNewCategoryName] = useState("");
+src/components/DeckList.tsx:437:  const [isSavingCategoryName, setIsSavingCategoryName] = useState(false);
+src/components/DeckList.tsx:508:  const [searchQuery, setSearchQuery] = useState("");
+src/components/DeckList.tsx:509:  const [sortOrder, setSortOrder] = useState<"default" | "newest" | "oldest" | "az" | "za">(() => {
+src/components/DeckList.tsx:514:  useEffect(() => {
+src/components/DeckList.tsx:518:  const [recentSearches, setRecentSearches] = useState<string[]>(() => {
+src/components/DeckList.tsx:522:  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+src/components/DeckList.tsx:523:  const scrollContainersRef = useRef<Record<string, HTMLDivElement | null>>({});
+src/components/DeckList.tsx:543:  const sortedAndFilteredDecks = useMemo(() => {
+src/components/DeckList.tsx:580:  const groupedDecks = useMemo(() => {
+src/components/DeckList.tsx:598:  const hierarchyRoot = useMemo(() => {
+src/components/DetailedStatsModal.tsx:1:import React, { useMemo } from "react";
+src/components/DetailedStatsModal.tsx:26:  const chartData = useMemo(() => {
+src/components/ExportStudyReport.tsx:1:import React, { useState } from "react";
+src/components/ExportStudyReport.tsx:36:  const [showModal, setShowModal] = useState(false);
+src/components/ExportStudyReport.tsx:37:  const [isCopied, setIsCopied] = useState(false);
+src/components/ExportStudyReport.tsx:38:  const [reportType, setReportType] = useState<"standard" | "weak_only">("standard");
+src/components/ErrorNotification.tsx:1:import React, { useState, useEffect } from 'react';
+src/components/ErrorNotification.tsx:3:import { useSystemConfig } from '../hooks/useSystemConfig';
+src/components/ErrorNotification.tsx:11:  const [isRedirecting, setIsRedirecting] = useState(false);
+src/components/ErrorNotification.tsx:12:  const { config } = useSystemConfig();
+src/components/ErrorNotification.tsx:22:  useEffect(() => {
+src/components/ManualFlashcardImporter.tsx:1:import React, { useState, useRef , useEffect , useMemo } from "react";
+src/components/ManualFlashcardImporter.tsx:37:import { useTheme } from "./ThemeProvider.js";
+src/components/ManualFlashcardImporter.tsx:40:  const { isFixLagEnabled } = useTheme();
+src/components/ManualFlashcardImporter.tsx:41:  const [activeTab, setActiveTab] = useState<"automated" | "manual">(
+src/components/ManualFlashcardImporter.tsx:44:  const [showToolModal, setShowToolModal] = useState(false);
+src/components/ManualFlashcardImporter.tsx:45:  const [copied, setCopied] = useState(false);
+src/components/ManualFlashcardImporter.tsx:46:  const [showNormalize, setShowNormalize] = useState(false);
+src/components/ManualFlashcardImporter.tsx:47:  const [copiedNormalize, setCopiedNormalize] = useState(false);
+src/components/ManualFlashcardImporter.tsx:50:  const [jsonInput, setJsonInput] = useState("");
+src/components/ManualFlashcardImporter.tsx:51:  const [previewCards, setPreviewCards] = useState<
+src/components/ManualFlashcardImporter.tsx:56:  const [manualMode, setManualMode] = useState<"form" | "json">("form");
+src/components/ManualFlashcardImporter.tsx:57:  const [manualRows, setManualRows] = useState<
+src/components/ManualFlashcardImporter.tsx:66:  const [autoCreatedCards, setAutoCreatedCards] = useState<any[]>([]);
+src/components/ManualFlashcardImporter.tsx:69:  const jsonFileInputRef = useRef<HTMLInputElement>(null);
+src/components/ManualFlashcardImporter.tsx:70:  const [jsonFileName, setJsonFileName] = useState("");
+src/components/ManualFlashcardImporter.tsx:71:  const [isAiParsingJson, setIsAiParsingJson] = useState(false);
+src/components/ManualFlashcardImporter.tsx:74:  const [deckTitle, setDeckTitle] = useState("");
+src/components/ManualFlashcardImporter.tsx:75:  const [deckSubject, setDeckSubject] = useState("");
+src/components/ManualFlashcardImporter.tsx:76:  const [isCreatingNewSubject, setIsCreatingNewSubject] = useState(false);
+src/components/ManualFlashcardImporter.tsx:77:  const [isAddToExisting, setIsAddToExisting] = useState(false);
+src/components/ManualFlashcardImporter.tsx:78:  const [selectedExistingDeckId, setSelectedExistingDeckId] = useState("");
+src/components/ManualFlashcardImporter.tsx:81:  const [rawTextLines, setRawTextLines] = useState("");
+src/components/ManualFlashcardImporter.tsx:82:  const [isAutomating, setIsAutomating] = useState(false);
+src/components/ManualFlashcardImporter.tsx:83:  const [autoProgress, setAutoProgress] = useState<{
+src/components/ManualFlashcardImporter.tsx:91:  const [concurrency, setConcurrency] = useState<number>(1);
+src/components/ManualFlashcardImporter.tsx:92:  const [chunkSize, setChunkSize] = useState<number>(20);
+src/components/ManualFlashcardImporter.tsx:93:  const [startChunkInput, setStartChunkInput] = useState<number>(1);
+src/components/ManualFlashcardImporter.tsx:95:  const [telemetryLogs, setTelemetryLogs] = useState<any[]>([]);
+src/components/ManualFlashcardImporter.tsx:111:  useEffect(() => {
+src/components/ManualFlashcardImporter.tsx:122:  const [savedPipeline, setSavedPipeline] = useState<{
+src/components/ManualFlashcardImporter.tsx:134:  const [pipelineErrors, setPipelineErrors] = useState<
+src/components/ManualFlashcardImporter.tsx:142:  const [editingErrorIndex, setEditingErrorIndex] = useState<number | null>(
+src/components/ManualFlashcardImporter.tsx:145:  const [editingErrorText, setEditingErrorText] = useState<string>("");
+src/components/ManualFlashcardImporter.tsx:146:  const [processingErrorIndex, setProcessingErrorIndex] = useState<
+src/components/ManualFlashcardImporter.tsx:149:  const [retryAllLoading, setRetryAllLoading] = useState<boolean>(false);
+src/components/ManualFlashcardImporter.tsx:152:  const allLogsRef = useRef<string[]>([]);
+src/components/ManualFlashcardImporter.tsx:153:  const logRafRef = useRef<number | null>(null);
+src/components/ManualFlashcardImporter.tsx:154:  const isCanceledRef = useRef<boolean>(false);
+src/components/ManualFlashcardImporter.tsx:155:  const activeControllersRef = useRef<Set<AbortController>>(new Set());
+src/components/ManualFlashcardImporter.tsx:158:  const [activeProcessingChunkIndex, setActiveProcessingChunkIndex] = useState<
+src/components/ManualFlashcardImporter.tsx:161:  const currentActiveChunkControllersRef = useRef<Map<number, AbortController>>(
+src/components/ManualFlashcardImporter.tsx:201:  useEffect(() => {
+src/components/ManualFlashcardImporter.tsx:215:  useEffect(() => {
+src/components/ManualFlashcardImporter.tsx:669:  const [isCatDropdownOpen, setIsCatDropdownOpen] = useState(false);
+src/components/ManualFlashcardImporter.tsx:670:  const catDropdownRef = useRef<HTMLDivElement>(null);
+src/components/ManualFlashcardImporter.tsx:671:  const catInputRef = useRef<HTMLInputElement>(null);
+src/components/ManualFlashcardImporter.tsx:673:  const existingCategories = useMemo(() => {
+src/components/ManualFlashcardImporter.tsx:685:  useEffect(() => {
+src/components/ManualFlashcardImporter.tsx:686:    function handleClickOutside(event: MouseEvent) {
+src/components/ManualFlashcardImporter.tsx:698:  const [isProcessing, setIsProcessing] = useState(false);
+src/components/ManualFlashcardImporter.tsx:699:  const [progress, setProgress] = useState<number | null>(null);
+src/components/ManualFlashcardImporter.tsx:700:  const [error, setError] = useState<string | null>(null);
+src/components/ManualFlashcardImporter.tsx:701:  const [successCount, setSuccessCount] = useState<number | null>(null);
+src/components/ManualFlashcardImporter.tsx:928:    textToParse?: string | React.MouseEvent,
+src/components/ManualFlashcardImporter.tsx:972:  const isProcessingRef = useRef(false);
+src/components/ThemeProvider.tsx:1:import React, { createContext, useContext, useEffect, useState } from "react";
+src/components/ThemeProvider.tsx:7:  toggleTheme: (e?: React.MouseEvent) => void;
+src/components/ThemeProvider.tsx:15:  const [theme, setTheme] = useState<Theme>("dark");
+src/components/ThemeProvider.tsx:16:  const [isFixLagEnabled, setIsFixLagEnabled] = useState<boolean>(false);
+src/components/ThemeProvider.tsx:18:  useEffect(() => {
+src/components/ThemeProvider.tsx:58:  const toggleTheme = (e?: React.MouseEvent) => {
+src/components/ThemeProvider.tsx:107:export const useTheme = () => {
+src/components/ThemeProvider.tsx:108:  const context = useContext(ThemeContext);
+src/components/ThemeProvider.tsx:109:  if (!context) throw new Error("useTheme must be used within ThemeProvider");
+src/components/ForceRefreshButton.tsx:1:import React, { useState, useEffect } from 'react';
+src/components/ForceRefreshButton.tsx:6:  const [show, setShow] = useState(false);
+src/components/ForceRefreshButton.tsx:8:  useEffect(() => {
+src/components/InteractiveTutorial.tsx:1:import React, { useState } from "react";
+src/components/InteractiveTutorial.tsx:36:  const [currentStep, setCurrentStep] = useState(0);
+src/components/HardwareTabOrchestrator.tsx:1:import React, { useCallback, useState } from "react";
+src/components/HardwareTabOrchestrator.tsx:19:export const useHardwareTabOrchestrator = <T extends string>(initialTab: T) => {
+src/components/HardwareTabOrchestrator.tsx:20:  const [activeTab, setActiveTab] = useState<T>(initialTab);
+src/components/HardwareTabOrchestrator.tsx:22:  const switchTab = useCallback((tabId: T) => {
+src/components/ShortcutsHelpModal.tsx:1:import React, { useState } from "react";
+src/components/ShortcutsHelpModal.tsx:30:  const [activeSubTab, setActiveSubTab] = useState<"keys" | "handbook" | "engine">("keys");
+src/components/FramerFireworks.tsx:1:import React, { useEffect, useState } from "react";
+src/components/FramerFireworks.tsx:7:  const [particles, setParticles] = useState<any[]>([]);
+src/components/FramerFireworks.tsx:9:  useEffect(() => {
+src/components/AuthScreen.tsx:1:import React, { useState, useEffect, useRef } from 'react';
+src/components/AuthScreen.tsx:19:import { useNavigate } from 'react-router-dom';
+src/components/AuthScreen.tsx:23:  useEffect(() => {
+src/components/AuthScreen.tsx:60:  const [isLogin, setIsLogin] = useState(true);
+src/components/AuthScreen.tsx:61:  const [email, setEmail] = useState('');
+src/components/AuthScreen.tsx:62:  const [password, setPassword] = useState('');
+src/components/AuthScreen.tsx:63:  const [username, setUsername] = useState('');
+src/components/AuthScreen.tsx:64:  const [adminKey, setAdminKey] = useState('');
+src/components/AuthScreen.tsx:65:  const [error, setError] = useState<string | null>(null);
+src/components/AuthScreen.tsx:66:  const [isLoading, setIsLoading] = useState(false);
+src/components/AuthScreen.tsx:67:  const [showPassword, setShowPassword] = useState(false);
+src/components/AuthScreen.tsx:68:  const [showAdminKey, setShowAdminKey] = useState(false);
+src/components/AuthScreen.tsx:69:  const navigate = useNavigate();
+src/components/AuthScreen.tsx:70:  const isExecutingAuth = useRef(false);
+src/components/AuthScreen.tsx:72:  useEffect(() => {
+src/components/WeeklyStudyAnalyticsModal.tsx:1:import React, { useEffect, useRef, useState } from "react";
+src/components/WeeklyStudyAnalyticsModal.tsx:25:  const svgRef = useRef<SVGSVGElement | null>(null);
+src/components/WeeklyStudyAnalyticsModal.tsx:26:  const containerRef = useRef<HTMLDivElement | null>(null);
+src/components/WeeklyStudyAnalyticsModal.tsx:27:  const [tooltipData, setTooltipData] = useState<{
+src/components/WeeklyStudyAnalyticsModal.tsx:36:  const [weeklyData, setWeeklyData] = useState<DayData[]>([]);
+src/components/WeeklyStudyAnalyticsModal.tsx:37:  const [totalWeeklyMinutes, setTotalWeeklyMinutes] = useState(0);
+src/components/WeeklyStudyAnalyticsModal.tsx:38:  const [bestDay, setBestDay] = useState<{ dayName: string; minutes: number } | null>(null);
+src/components/WeeklyStudyAnalyticsModal.tsx:40:  useEffect(() => {
+src/components/WeeklyStudyAnalyticsModal.tsx:139:  // 2. Render D3 Chart inside useEffect when weeklyData changes
+src/components/WeeklyStudyAnalyticsModal.tsx:140:  useEffect(() => {
+src/components/ParticleBackground.tsx:1:import React, { useMemo } from 'react';
+src/components/ParticleBackground.tsx:2:import { useTheme } from './ThemeProvider';
+src/components/ParticleBackground.tsx:5:  const { isFixLagEnabled } = useTheme();
+src/components/ParticleBackground.tsx:9:  const stars = useMemo(() => {
+src/components/GlobalActivityFeed.tsx:1:import React, { useState, useEffect, useCallback, useMemo } from 'react';
+src/components/GlobalActivityFeed.tsx:38:  const [showPicker, setShowPicker] = useState(false);
+src/components/GlobalActivityFeed.tsx:242:  const [items, setItems] = useState<FeedItem[]>([]);
+src/components/GlobalActivityFeed.tsx:243:  const [isLoading, setIsLoading] = useState(true);
+src/components/GlobalActivityFeed.tsx:244:  const [isAdding, setIsAdding] = useState(false);
+src/components/GlobalActivityFeed.tsx:245:  const [newContent, setNewContent] = useState('');
+src/components/GlobalActivityFeed.tsx:246:  const [error, setError] = useState<string | null>(null);
+src/components/GlobalActivityFeed.tsx:247:  const [lastSubmissions, setLastSubmissions] = useState<number[]>([]);
+src/components/GlobalActivityFeed.tsx:248:  const [sendToGlobal, setSendToGlobal] = useState(false);
+src/components/GlobalActivityFeed.tsx:249:  const [isSending, setIsSending] = useState(false);
+src/components/GlobalActivityFeed.tsx:250:  const [isMaximized, setIsMaximized] = useState(false);
+src/components/GlobalActivityFeed.tsx:255:  const checkSpam = useCallback(() => {
+src/components/GlobalActivityFeed.tsx:265:  useEffect(() => {
+src/components/GlobalActivityFeed.tsx:352:  const handleAddActivity = useCallback(async () => {
+src/components/GlobalActivityFeed.tsx:429:  const handleDelete = useCallback(async (id: string) => {
+src/components/GlobalActivityFeed.tsx:459:  const handleReact = useCallback(async (itemId: string, emoji: string) => {
+src/components/GlobalActivityFeed.tsx:544:  const handleTogglePin = useCallback(async (itemId: string, currentPinned: boolean) => {
+src/components/GlobalActivityFeed.tsx:577:  useEffect(() => {
+src/components/GlobalActivityFeed.tsx:581:  const pinnedItems = useMemo(() => items.filter(item => item.isPinned), [items]);
+src/components/NetworkStatus.tsx:1:import { useState, useEffect } from 'react';
+src/components/NetworkStatus.tsx:9:  const [isOnline, setIsOnline] = useState(navigator.onLine);
+src/components/NetworkStatus.tsx:10:  const [showToast, setShowToast] = useState(false);
+src/components/NetworkStatus.tsx:11:  const [isSyncing, setIsSyncing] = useState(false);
+src/components/NetworkStatus.tsx:12:  const [pendingCount, setPendingCount] = useState(0);
+src/components/NetworkStatus.tsx:13:  const [syncNotification, setSyncNotification] = useState<string | null>(null);
+src/components/NetworkStatus.tsx:15:  useEffect(() => {
+src/components/AchievementCardExport.tsx:1:import React, { useRef, useState } from 'react';
+src/components/AchievementCardExport.tsx:20:  const [isExporting, setIsExporting] = useState(false);
+src/components/AchievementCardExport.tsx:21:  const [showExportMenu, setShowExportMenu] = useState(false);
+src/components/AchievementCardExport.tsx:22:  const captureRef = useRef<HTMLDivElement>(null);
+src/components/AchievementCardExport.tsx:23:  const exportAllRef = useRef<HTMLDivElement>(null);
+src/components/AchievementCardExport.tsx:27:  const [currentIndex, setCurrentIndex] = useState(0);
+src/components/AchievementCardExport.tsx:88:        useCORS: true,
+src/components/GlobalErrorToast.tsx:1:import React, { useEffect, useState } from "react";
+src/components/GlobalErrorToast.tsx:13:import { useSystemConfig } from "../hooks/useSystemConfig";
+src/components/GlobalErrorToast.tsx:16:  const [errors, setErrors] = useState<ApiError[]>([]);
+src/components/GlobalErrorToast.tsx:17:  const { config } = useSystemConfig();
+src/components/GlobalErrorToast.tsx:19:  useEffect(() => {
+src/components/AIPromptsEditorWidget.tsx:1:import React, { useState, useEffect } from 'react';
+src/components/AIPromptsEditorWidget.tsx:8:  const [prompts, setPrompts] = useState<any>({});
+src/components/AIPromptsEditorWidget.tsx:9:  const [loading, setLoading] = useState(false);
+src/components/AIPromptsEditorWidget.tsx:10:  const [saving, setSaving] = useState(false);
+src/components/AIPromptsEditorWidget.tsx:11:  const [error, setError] = useState<string | null>(null);
+src/components/AIPromptsEditorWidget.tsx:12:  const [success, setSuccess] = useState<string | null>(null);
+src/components/AIPromptsEditorWidget.tsx:29:  useEffect(() => {
+src/components/AppUpdateNotification.tsx:1:import React, { useState, useEffect } from 'react';
+src/components/AppUpdateNotification.tsx:6:  const [showUpdate, setShowUpdate] = useState(false);
+src/components/AppUpdateNotification.tsx:7:  const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
+src/components/AppUpdateNotification.tsx:9:  useEffect(() => {
+src/components/DocumentConverter.tsx:2:  useState,
+src/components/DocumentConverter.tsx:3:  useRef,
+src/components/DocumentConverter.tsx:4:  useEffect,
+src/components/DocumentConverter.tsx:5:  useMemo,
+src/components/DocumentConverter.tsx:6:  useCallback,
+src/components/DocumentConverter.tsx:249:  const isCancelledRef = useRef<boolean>(false);
+src/components/DocumentConverter.tsx:250:  const isPausedRef = useRef<boolean>(false);
+src/components/DocumentConverter.tsx:251:  const [activeImportTab, setActiveImportTab] = useState<
+src/components/DocumentConverter.tsx:261:  const [manualFront, setManualFront] = useState("");
+src/components/DocumentConverter.tsx:262:  const [manualWordForm, setManualWordForm] = useState("");
+src/components/DocumentConverter.tsx:263:  const [manualBack, setManualBack] = useState("");
+src/components/DocumentConverter.tsx:264:  const [manualBatch, setManualBatch] = useState<any[]>([]);
+src/components/DocumentConverter.tsx:265:  const [editingManualId, setEditingManualId] = useState<string | null>(null);
+src/components/DocumentConverter.tsx:266:  const manualFrontInputRef = useRef<HTMLInputElement>(null);
+src/components/DocumentConverter.tsx:267:  const [isGeneratingManualAi, setIsGeneratingManualAi] = useState(false);
+src/components/DocumentConverter.tsx:268:  const [aiAnalysisMode, setAiAnalysisMode] = useState<string | null>(null);
+src/components/DocumentConverter.tsx:269:  const [showAiAnalysisOverlay, setShowAiAnalysisOverlay] = useState(false);
+src/components/DocumentConverter.tsx:271:  useEffect(() => {
+src/components/DocumentConverter.tsx:312:  const [isAiSystemBusy, setIsAiSystemBusy] = useState(false);
+src/components/DocumentConverter.tsx:313:  const [aiBusyType, setAiBusyType] = useState<string | null>(null);
+src/components/DocumentConverter.tsx:314:  const [streamedBytes, setStreamedBytes] = useState<number>(0);
+src/components/DocumentConverter.tsx:315:  const [systemLinks, setSystemLinks] = useState<{aiStudioLink?: string, geminiLink?: string, chatbotLink?: string, chatbotDescription?: string} | null>(null);
+src/components/DocumentConverter.tsx:317:  useEffect(() => {
+src/components/DocumentConverter.tsx:328:  useEffect(() => {
+src/components/DocumentConverter.tsx:384:  useEffect(() => {
+src/components/DocumentConverter.tsx:390:  const [aiUsage, setAiUsage] = useState<{
+src/components/DocumentConverter.tsx:396:  const fetchUserAiQuota = useCallback(async () => {
+src/components/DocumentConverter.tsx:433:  useEffect(() => {
+src/components/DocumentConverter.tsx:437:  const [concurrency, setConcurrency] = useState<number>(1);
+src/components/DocumentConverter.tsx:438:  const [reviewPage, setReviewPage] = useState<number>(1);
+src/components/DocumentConverter.tsx:441:  const [file, setFile] = useState<File | null>(null);
+src/components/DocumentConverter.tsx:442:  const [rawTextarea, setRawTextarea] = useState("");
+src/components/DocumentConverter.tsx:443:  const [jsonPasteInput, setJsonPasteInput] = useState("");
+src/components/DocumentConverter.tsx:444:  const [uploadedFileName, setUploadedFileName] = useState("");
+src/components/DocumentConverter.tsx:447:  const [deckTitle, setDeckTitle] = useState("");
+src/components/DocumentConverter.tsx:448:  const [deckSubject, setDeckSubject] = useState("");
+src/components/DocumentConverter.tsx:449:  const [isCreatingNewSubject, setIsCreatingNewSubject] = useState(false);
+src/components/DocumentConverter.tsx:450:  const [isAddToExisting, setIsAddToExisting] = useState(false);
+src/components/DocumentConverter.tsx:451:  const [selectedExistingDeckId, setSelectedExistingDeckId] = useState("");
+src/components/DocumentConverter.tsx:454:  const [isProcessing, setIsProcessing] = useState(false);
+src/components/DocumentConverter.tsx:455:  const [progressText, setProgressText] = useState("");
+src/components/DocumentConverter.tsx:456:  const [progressPercent, setProgressPercent] = useState<number>(0);
+src/components/DocumentConverter.tsx:457:  const [error, setError] = useState<string | null>(null);
+src/components/DocumentConverter.tsx:458:  const [successCount, setSuccessCount] = useState<number | null>(null);
+src/components/DocumentConverter.tsx:461:  const [isChunkingEnabled, setIsChunkingEnabled] = useState(true);
+src/components/DocumentConverter.tsx:462:  const [sanitizeDuplicates, setSanitizeDuplicates] = useState(true);
+src/components/DocumentConverter.tsx:463:  const [isSplitDeckEnabled, setIsSplitDeckEnabled] = useState(false);
+src/components/DocumentConverter.tsx:464:  const [splitDeckSize, setSplitDeckSize] = useState<number>(40);
+src/components/DocumentConverter.tsx:466:  const [showBypassModal, setShowBypassModal] = useState(false);
+src/components/DocumentConverter.tsx:467:  const [showApiDownOverlay, setShowApiDownOverlay] = useState(false);
+src/components/DocumentConverter.tsx:468:  const [toastSuccessMessage, setToastSuccessMessage] = useState<string | null>(
+src/components/DocumentConverter.tsx:475:  const isSplitDeckEnabledRef = useRef(isSplitDeckEnabled);
+src/components/DocumentConverter.tsx:476:  const splitDeckSizeRef = useRef(splitDeckSize);
+src/components/DocumentConverter.tsx:477:  const isAddToExistingRef = useRef(isAddToExisting);
+src/components/DocumentConverter.tsx:478:  const deckTitleRef = useRef(deckTitle);
+src/components/DocumentConverter.tsx:479:  const deckSubjectRef = useRef(deckSubject);
+src/components/DocumentConverter.tsx:481:  useEffect(() => {
+src/components/DocumentConverter.tsx:485:  useEffect(() => {
+src/components/DocumentConverter.tsx:489:  useEffect(() => {
+src/components/DocumentConverter.tsx:493:  useEffect(() => {
+src/components/DocumentConverter.tsx:497:  useEffect(() => {
+src/components/DocumentConverter.tsx:501:  const [chunkMaxWords, setChunkMaxWords] = useState<number>(300); // Mặc định 300 từ
+src/components/DocumentConverter.tsx:502:  const [chunkMaxChars, setChunkMaxChars] = useState<number>(2500); // Mặc định 2500 kí tự
+src/components/DocumentConverter.tsx:503:  const [chunkOverlapWords, setChunkOverlapWords] = useState<number>(10);
+src/components/DocumentConverter.tsx:504:  const [lastSplitMetrics, setLastSplitMetrics] = useState<{
+src/components/DocumentConverter.tsx:511:  const [progressLogs, setProgressLogs] = useState<string[]>([]);
+src/components/DocumentConverter.tsx:512:  const [isLogExpanded, setIsLogExpanded] = useState(false);
+src/components/DocumentConverter.tsx:513:  const [logFontSize, setLogFontSize] = useState<"small" | "medium" | "large">(
+src/components/DocumentConverter.tsx:516:  const allLogsRef = useRef<string[]>([]);
+src/components/DocumentConverter.tsx:517:  const logRafRef = useRef<number | null>(null);
+src/components/DocumentConverter.tsx:518:  const lastLogUpdateRef = useRef<number>(0);
+src/components/DocumentConverter.tsx:521:  const [activeSession, setActiveSession] = useState<{
+src/components/DocumentConverter.tsx:542:  const [currentCount, setCurrentCount] = useState<number>(() => {
+src/components/DocumentConverter.tsx:547:  const [extractedCards, setExtractedCards] = useState<any[] | null>(null);
+src/components/DocumentConverter.tsx:550:  const [engineGuard, setEngineGuard] = useState<"safe" | "warn">("safe");
+src/components/DocumentConverter.tsx:551:  const [timerSeconds, setTimerSeconds] = useState(5);
+src/components/DocumentConverter.tsx:552:  const [pendingTrigger, setPendingTrigger] = useState<
+src/components/DocumentConverter.tsx:555:  const timerRef = useRef<any>(null);
+src/components/DocumentConverter.tsx:628:  useEffect(() => {
+src/components/DocumentConverter.tsx:645:  const fileInputRef = useRef<HTMLInputElement>(null);
+src/components/DocumentConverter.tsx:646:  const jsonFileInputRef = useRef<HTMLInputElement>(null);
+src/components/DocumentConverter.tsx:649:  const getExistingCardFrontsMap = useCallback((): Set<string> => {
+src/components/DocumentConverter.tsx:663:  const existingCategories = useMemo(() => {
+src/components/DocumentConverter.tsx:899:  // Removed broken useEffect
+src/components/DocumentConverter.tsx:902:  useEffect(() => {
+src/components/DocumentConverter.tsx:906:  useEffect(() => {
+src/components/DocumentConverter.tsx:949:  useEffect(() => {
+src/components/DocumentConverter.tsx:1981:  const handleParseJsonOption = async (useAiSlightFix = false) => {
+src/components/DocumentConverter.tsx:1992:      if (useAiSlightFix) {
+src/components/DocumentConverter.tsx:2066:  const handlePauseSession = () => {
+src/components/DocumentConverter.tsx:2092:  const handleCardChange = useCallback(
+src/components/DocumentConverter.tsx:2103:  const handleRemoveCard = useCallback((id: string) => {
+src/components/DocumentConverter.tsx:2110:  const runQuietIncompleteHydrationBackground = useCallback(
+src/components/DocumentConverter.tsx:2241:  const handleSaveDeck = useCallback(async () => {
+src/components/DocumentConverter.tsx:3654:                  onClick={handlePauseSession}
+src/components/SoundProvider.tsx:1:import React, { createContext, useContext, useEffect, useState } from "react";
+src/components/SoundProvider.tsx:12:  const [isSoundEnabled, setIsSoundEnabled] = useState<boolean>(!getIsMuted());
+src/components/SoundProvider.tsx:14:  useEffect(() => {
+src/components/SoundProvider.tsx:33:export const useSoundContext = () => {
+src/components/SoundProvider.tsx:34:  const context = useContext(SoundContext);
+src/components/SoundProvider.tsx:35:  if (!context) throw new Error("useSoundContext must be used within SoundProvider");
+src/components/SkillTreeGraph.tsx:1:import React, { useEffect, useRef, useState , useMemo } from 'react';
+src/components/SkillTreeGraph.tsx:3:import { useTheme } from './ThemeProvider';
+src/components/SkillTreeGraph.tsx:4:import { useNavigate } from 'react-router-dom';
+src/components/SkillTreeGraph.tsx:29:  const containerRef = useRef<HTMLDivElement>(null);
+src/components/SkillTreeGraph.tsx:30:  const { theme } = useTheme();
+src/components/SkillTreeGraph.tsx:31:  const navigate = useNavigate();
+src/components/SkillTreeGraph.tsx:32:  const [selectedNode, setSelectedNode] = useState<NodeData | null>(null);
+src/components/SkillTreeGraph.tsx:33:  const [hoveredNode, setHoveredNode] = useState<NodeData | null>(null);
+src/components/SkillTreeGraph.tsx:36:  const [selectedSubject, setSelectedSubject] = useState<string>("All");
+src/components/SkillTreeGraph.tsx:38:  const uniqueSubjects = useMemo(() => {
+src/components/SkillTreeGraph.tsx:44:  useEffect(() => {
+src/components/GlobalErrorReporter.tsx:1:import React, { useState, useEffect } from 'react';
+src/components/GlobalErrorReporter.tsx:5:import { useSystemConfig } from "../hooks/useSystemConfig";
+src/components/GlobalErrorReporter.tsx:8:  const [errorLog, setErrorLog] = useState<{message: string; stack?: string; time: string; url: string} | null>(null);
+src/components/GlobalErrorReporter.tsx:9:  const [isRedirecting, setIsRedirecting] = useState(false);
+src/components/GlobalErrorReporter.tsx:10:  const { config } = useSystemConfig();
+src/components/GlobalErrorReporter.tsx:12:  useEffect(() => {
+src/components/VerifyEmailScreen.tsx:1:import React, { useEffect } from 'react';
+src/components/VerifyEmailScreen.tsx:3:import { useNavigate, useSearchParams } from 'react-router-dom';
+src/components/VerifyEmailScreen.tsx:6:  useEffect(() => {
+src/components/VerifyEmailScreen.tsx:10:  const navigate = useNavigate();
+src/components/VerifyEmailScreen.tsx:11:  const [searchParams] = useSearchParams();
+src/components/SystemLinksEditorWidget.tsx:1:import React, { useState, useEffect } from "react";
+src/components/SystemLinksEditorWidget.tsx:5:  const [links, setLinks] = useState<any>(null);
+src/components/SystemLinksEditorWidget.tsx:6:  const [isLoading, setIsLoading] = useState(true);
+src/components/SystemLinksEditorWidget.tsx:7:  const [isSaving, setIsSaving] = useState(false);
+src/components/SystemLinksEditorWidget.tsx:8:  const [error, setError] = useState<string | null>(null);
+src/components/SystemLinksEditorWidget.tsx:9:  const [success, setSuccess] = useState<string | null>(null);
+src/components/SystemLinksEditorWidget.tsx:31:  useEffect(() => {
+src/components/OfflineStorageProgressWidget.tsx:1:import React, { useEffect, useState } from "react";
+src/components/OfflineStorageProgressWidget.tsx:7:  const [estimate, setEstimate] = useState<{ quota: number; usage: number; available: boolean }>({ quota: 0, usage: 0, available: false });
+src/components/OfflineStorageProgressWidget.tsx:8:  const [offlineCount, setOfflineCount] = useState({ decks: 0, cards: 0 });
+src/components/OfflineStorageProgressWidget.tsx:10:  useEffect(() => {
+src/hooks/usePersistentToggle.ts:1:import { useState, useEffect, useCallback } from 'react';
+src/hooks/usePersistentToggle.ts:12:export function usePersistentToggle(key: string, defaultValue: boolean = false) {
+src/hooks/usePersistentToggle.ts:13:  const [value, setValue] = useState<boolean>(defaultValue);
+src/hooks/usePersistentToggle.ts:14:  const [isReady, setIsReady] = useState(false);
+src/hooks/usePersistentToggle.ts:20:  useEffect(() => {
+src/hooks/usePersistentToggle.ts:62:  const toggle = useCallback(async () => {
+src/hooks/useSound.ts:2:import { useSoundContext } from '../components/SoundProvider';
+src/hooks/useSound.ts:4:export const useSound = () => {
+src/hooks/useSound.ts:5:  const { isSoundEnabled } = useSoundContext();
+src/hooks/useSystemConfig.ts:1:import { useState, useEffect } from 'react';
+src/hooks/useSystemConfig.ts:5:export function useSystemConfig() {
+src/hooks/useSystemConfig.ts:6:  const [config, setConfig] = useState<{ supportEmail: string }>({ supportEmail: 'lgbtbd12@gmail.com' });
+src/hooks/useSystemConfig.ts:8:  useEffect(() => {
+src/lib/cooldown.ts:1:import { useState, useEffect } from "react";
+src/lib/cooldown.ts:35:export function useAICooldown(user: User | null) {
+src/lib/cooldown.ts:36:  const [cooldownRemaining, setCooldownRemaining] = useState<number>(() => getAICooldownTimeRemaining(user));
+src/lib/cooldown.ts:38:  useEffect(() => {
+src/sandbox/SandboxExample.tsx:6:import React, { useState, useEffect } from 'react';
+src/sandbox/SandboxExample.tsx:11:  const [data, setData] = useState('');
+src/sandbox/SandboxExample.tsx:12:  const [storedData, setStoredData] = useState<string | null>(null);
+src/sandbox/SandboxExample.tsx:14:  useEffect(() => {
+src/pages/StudentDashboard.tsx:2:  useState,
+src/pages/StudentDashboard.tsx:3:  useEffect,
+src/pages/StudentDashboard.tsx:4:  useRef,
+src/pages/StudentDashboard.tsx:5:  useMemo,
+src/pages/StudentDashboard.tsx:6:  useCallback,
+src/pages/StudentDashboard.tsx:9:import { Link, Navigate, useNavigate } from "react-router-dom";
+src/pages/StudentDashboard.tsx:110:  useMotionValue,
+src/pages/StudentDashboard.tsx:111:  useTransform,
+src/pages/StudentDashboard.tsx:127:import { useTheme } from "../components/ThemeProvider";
+src/pages/StudentDashboard.tsx:134:import { useAICooldown, triggerAICooldown } from "../lib/cooldown";
+src/pages/StudentDashboard.tsx:212:  const { cooldownRemaining } = useAICooldown(user);
+src/pages/StudentDashboard.tsx:233:  const { cooldownRemaining } = useAICooldown(user);
+src/pages/StudentDashboard.tsx:240:import { useSound } from "../hooks/useSound";
+src/pages/StudentDashboard.tsx:248:  const count = useMotionValue(0);
+src/pages/StudentDashboard.tsx:249:  const rounded = useTransform(count, (latest) => Math.round(latest));
+src/pages/StudentDashboard.tsx:251:  useEffect(() => {
+src/pages/StudentDashboard.tsx:332:  useEffect(() => {
+src/pages/StudentDashboard.tsx:336:  const { isFixLagEnabled, toggleFixLag } = useTheme();
+src/pages/StudentDashboard.tsx:337:  const { click, success, error } = useSound();
+src/pages/StudentDashboard.tsx:339:  const prevLevelRef = useRef<number | null>(null);
+src/pages/StudentDashboard.tsx:344:  const [levelUpData, setLevelUpData] = useState<{
+src/pages/StudentDashboard.tsx:349:  const [editingDeckData, setEditingDeckData] = useState<{
+src/pages/StudentDashboard.tsx:355:  const [showAchillesSetup, setShowAchillesSetup] = useState(false);
+src/pages/StudentDashboard.tsx:356:  const [achillesSelectedDecks, setAchillesSelectedDecks] = useState<string[]>(
+src/pages/StudentDashboard.tsx:359:  const [isAchillesQuizMode, setIsAchillesQuizMode] = useState(false);
+src/pages/StudentDashboard.tsx:361:  useEffect(() => {
+src/pages/StudentDashboard.tsx:402:  const [quote] = useState(
+src/pages/StudentDashboard.tsx:406:  const [showTutorial, setShowTutorial] = useState(false);
+src/pages/StudentDashboard.tsx:407:  const [activeLoreItem, setActiveLoreItem] = useState<string | null>(null);
+src/pages/StudentDashboard.tsx:408:  const [appDownloadConfig, setAppDownloadConfig] = useState({
+src/pages/StudentDashboard.tsx:413:  const [isEditingAppDownload, setIsEditingAppDownload] = useState(false);
+src/pages/StudentDashboard.tsx:414:  const [isSavingAppDownload, setIsSavingAppDownload] = useState(false);
+src/pages/StudentDashboard.tsx:416:  const [activeTab, setActiveTab] = useState<
+src/pages/StudentDashboard.tsx:435:  useEffect(() => {
+src/pages/StudentDashboard.tsx:438:  const [selectedShopItem, setSelectedShopItem] = useState<{
+src/pages/StudentDashboard.tsx:450:  const [profileNameInput, setProfileNameInput] = useState("");
+src/pages/StudentDashboard.tsx:451:  const [isEditingProfileName, setIsEditingProfileName] = useState(false);
+src/pages/StudentDashboard.tsx:452:  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+src/pages/StudentDashboard.tsx:453:  const profileFileInputRef = useRef<HTMLInputElement>(null);
+src/pages/StudentDashboard.tsx:455:  useEffect(() => {
+src/pages/StudentDashboard.tsx:469:  useEffect(() => {
+src/pages/StudentDashboard.tsx:531:  const [viewMode, setViewModeState] = useState<"recent" | "all">(() => {
+src/pages/StudentDashboard.tsx:542:  const [showClearConfirm, setShowClearConfirm] = useState(false);
+src/pages/StudentDashboard.tsx:543:  const [showCacheClearConfirm, setShowCacheClearConfirm] = useState(false);
+src/pages/StudentDashboard.tsx:545:  const [muteAll, setMuteAll] = useState(() => getIsMuted());
+src/pages/StudentDashboard.tsx:546:  const [currentMonth, setCurrentMonth] = useState(() => new Date());
+src/pages/StudentDashboard.tsx:547:  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
+src/pages/StudentDashboard.tsx:554:  const [isChartExpanded, setIsChartExpanded] = useState(false);
+src/pages/StudentDashboard.tsx:555:  const [chartPeriod, setChartPeriod] = useState<
+src/pages/StudentDashboard.tsx:558:  const [isWeeklyStudyModalOpen, setIsWeeklyStudyModalOpen] = useState(false);
+src/pages/StudentDashboard.tsx:560:    useState(false);
+src/pages/StudentDashboard.tsx:561:  const [showEnvDebug, setShowEnvDebug] = useState(false);
+src/pages/StudentDashboard.tsx:562:  const [localFontSize, setLocalFontSize] = useState<number>(() => {
+src/pages/StudentDashboard.tsx:567:  const [localUiDensity, setLocalUiDensity] = useState<
+src/pages/StudentDashboard.tsx:576:  useEffect(() => {
+src/pages/StudentDashboard.tsx:613:  useEffect(() => {
+src/pages/StudentDashboard.tsx:635:  const [rawDecks, setRawDecks] = useState<Deck[]>(() => store.getDecks());
+src/pages/StudentDashboard.tsx:636:  const [personalCardStates, setPersonalCardStates] = useState<any[]>([]);
+src/pages/StudentDashboard.tsx:637:  const [broadcasts, setBroadcasts] = useState<any[]>([]);
+src/pages/StudentDashboard.tsx:639:  useEffect(() => {
+src/pages/StudentDashboard.tsx:696:  const [joinStatus, setJoinStatus] = useState<string | null>(null);
+src/pages/StudentDashboard.tsx:697:  const [newGroupName, setNewGroupName] = useState("");
+src/pages/StudentDashboard.tsx:698:  const [createdGroupId, setCreatedGroupId] = useState<string | null>(null);
+src/pages/StudentDashboard.tsx:699:  const [isCreating, setIsCreating] = useState(false);
+src/pages/StudentDashboard.tsx:702:  const [manualTitle, setManualTitle] = useState("");
+src/pages/StudentDashboard.tsx:703:  const [manualSubject, setManualSubject] = useState("");
+src/pages/StudentDashboard.tsx:704:  const [isCreatingNewSubject, setIsCreatingNewSubject] = useState(false);
+src/pages/StudentDashboard.tsx:705:  const [manualCards, setManualCards] = useState<
+src/pages/StudentDashboard.tsx:709:  const existingSubjects = useMemo(() => {
+src/pages/StudentDashboard.tsx:736:  const [currentFront, setCurrentFront] = useState("");
+src/pages/StudentDashboard.tsx:737:  const [currentBack, setCurrentBack] = useState("");
+src/pages/StudentDashboard.tsx:738:  const [creationMethod, setCreationMethod] = useState<"ai" | "manual">("ai");
+src/pages/StudentDashboard.tsx:798:  const navigate = useNavigate();
+src/pages/StudentDashboard.tsx:799:  const [isStartingQuest, setIsStartingQuest] = useState(false);
+src/pages/StudentDashboard.tsx:800:  const [offlineRoadmapError, setOfflineRoadmapError] = useState(false);
+src/pages/StudentDashboard.tsx:802:  const handleStartDailyQuest = useCallback(async () => {
+src/pages/StudentDashboard.tsx:902:  const [isInitialLoading, setIsInitialLoading] = useState(
+src/pages/StudentDashboard.tsx:907:  const unsubDecksRef = useRef<(() => void) | null>(null);
+src/pages/StudentDashboard.tsx:908:  useEffect(() => {
+src/pages/StudentDashboard.tsx:1014:  const unsubCardStatesRef = useRef<(() => void) | null>(null);
+src/pages/StudentDashboard.tsx:1015:  useEffect(() => {
+src/pages/StudentDashboard.tsx:1047:  const localDecks = useMemo(() => {
+src/pages/StudentDashboard.tsx:1106:  useEffect(() => {
+src/pages/StudentDashboard.tsx:1120:  useEffect(() => {
+src/pages/StudentDashboard.tsx:1154:  const [dbUsers, setDbUsers] = useState<any[]>([]);
+src/pages/StudentDashboard.tsx:1157:  const unsubUsersRef = useRef<(() => void) | null>(null);
+src/pages/StudentDashboard.tsx:1158:  useEffect(() => {
+src/pages/StudentDashboard.tsx:1224:  useEffect(() => {
+src/pages/StudentDashboard.tsx:1229:  const sortedUsers = useMemo(() => {
+src/pages/StudentDashboard.tsx:1311:  const prevRanksRef = useRef<Record<string, number>>({});
+src/pages/StudentDashboard.tsx:1312:  const [rankTrends, setRankTrends] = useState<
+src/pages/StudentDashboard.tsx:1315:  const [selectedUserProfile, setSelectedUserProfile] = useState<any>(null);
+src/pages/StudentDashboard.tsx:1317:  const rankCelebratedRef = useRef(false);
+src/pages/StudentDashboard.tsx:1319:  useEffect(() => {
+src/pages/StudentDashboard.tsx:1401:  const [groupId, setGroupId] = useState("");
+src/pages/StudentDashboard.tsx:1402:  const [groupName, setGroupName] = useState("");
+src/pages/StudentDashboard.tsx:1403:  const [activeGroup, setActiveGroup] = useState<any>(null);
+src/pages/StudentDashboard.tsx:1424:  const [studentToDelete, setStudentToDelete] = useState<any | null>(null);
+src/pages/StudentDashboard.tsx:1425:  const [isDeletingStudent, setIsDeletingStudent] = useState(false);
+src/pages/StudentDashboard.tsx:1426:  const [deleteMode, setDeleteMode] = useState<"hard" | "soft">("hard");
+src/pages/StudentDashboard.tsx:1455:  const calculateWeeklyStudyHours = useCallback(() => {
+src/pages/StudentDashboard.tsx:1500:  const { hours: studyHours, minutes: studyMinutes } = useMemo(
+src/pages/StudentDashboard.tsx:1506:  const [showRemindLaterModal, setShowRemindLaterModal] = useState(false);
+src/pages/StudentDashboard.tsx:1507:  const [showUnknownCardsModal, setShowUnknownCardsModal] = useState(false); // NEW STATE
+src/pages/StudentDashboard.tsx:1509:  useEffect(() => {
+src/pages/StudentDashboard.tsx:1545:  const allCardsNormalized = useMemo(() => {
+src/pages/StudentDashboard.tsx:1555:  const unknownCards = useMemo(() => {
+src/pages/StudentDashboard.tsx:1559:  const remindLaterCards = useMemo(() => {
+src/pages/StudentDashboard.tsx:1588:  const startCategoryRemindLaterStudy = useCallback(
+src/pages/StudentDashboard.tsx:1617:  const startCategoryUnknownStudy = useCallback(
+src/pages/StudentDashboard.tsx:1646:  const startCategoryStudyAll = useCallback(
+src/pages/StudentDashboard.tsx:1673:  const streakCelebratedRef = useRef(false);
+src/pages/StudentDashboard.tsx:1675:  useEffect(() => {
+src/pages/StudentDashboard.tsx:1692:  const [dailyGoal, setDailyGoal] = useState(() => {
+src/pages/StudentDashboard.tsx:1700:  const [, setForceRender] = useState(0);
+src/pages/StudentDashboard.tsx:1702:  useEffect(() => {
+src/pages/StudentDashboard.tsx:1742:  const deckWithLowestMastery = useMemo(() => {
+src/pages/StudentDashboard.tsx:1880:  const [isQuizLoading, setIsQuizLoading] = useState(false);
+src/pages/StudentDashboard.tsx:1881:  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
+src/pages/StudentDashboard.tsx:1882:  const [quizCurrentIndex, setQuizCurrentIndex] = useState(0);
+src/pages/StudentDashboard.tsx:1883:  const [quizScore, setQuizScore] = useState(0);
+src/pages/StudentDashboard.tsx:1884:  const [quizFinished, setQuizFinished] = useState(false);
+src/pages/StudentDashboard.tsx:1885:  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+src/pages/StudentDashboard.tsx:1886:  const [isAnswerRevealed, setIsAnswerRevealed] = useState(false);
+src/pages/StudentDashboard.tsx:1887:  const [quizError, setQuizError] = useState<string | null>(null);
+src/pages/StudentDashboard.tsx:1888:  const [quizQuote] = useState(
+src/pages/StudentDashboard.tsx:1893:  const [selectedExamDecks, setSelectedExamDecks] = useState<string[]>([]);
+src/pages/StudentDashboard.tsx:1894:  const [examQuestionCount, setExamQuestionCount] = useState<number>(10);
+src/pages/StudentDashboard.tsx:1897:  const [activeQuizSetup, setActiveQuizSetup] = useState<{
+src/pages/StudentDashboard.tsx:1901:  const [quizQuestionCount, setQuizQuestionCount] = useState<number>(15);
+src/pages/StudentDashboard.tsx:2284:  const trendData = useMemo(() => getTrendData(), [chartPeriod, basePoints]);
+src/pages/StudentDashboard.tsx:2286:  const getStreakData = useCallback(() => {
+src/pages/StudentDashboard.tsx:2292:  const streakData = useMemo(() => getStreakData(), [getStreakData]);
+src/pages/CoStudyRoom.tsx:1:import React, { useState, useEffect, useRef , useCallback } from "react";
+src/pages/CoStudyRoom.tsx:8:import { useNavigate } from "react-router-dom";
+src/pages/CoStudyRoom.tsx:41:  useEffect(() => {
+src/pages/CoStudyRoom.tsx:45:  const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([]);
+src/pages/CoStudyRoom.tsx:46:  const [isFocusing, setIsFocusing] = useState(false);
+src/pages/CoStudyRoom.tsx:47:  const [timeLeft, setTimeLeft] = useState(25 * 60);
+src/pages/CoStudyRoom.tsx:48:  const [mode, setMode] = useState<"focus" | "break">("focus");
+src/pages/CoStudyRoom.tsx:49:  const [cycles, setCycles] = useState(0);
+src/pages/CoStudyRoom.tsx:50:  const [task, setTask] = useState("");
+src/pages/CoStudyRoom.tsx:53:  const [earnedXp, setEarnedXp] = useState(0);
+src/pages/CoStudyRoom.tsx:54:  const [showChecklist, setShowChecklist] = useState(false);
+src/pages/CoStudyRoom.tsx:55:  const [tasks, setTasks] = useState<TaskItem[]>([]);
+src/pages/CoStudyRoom.tsx:56:  const [newTaskText, setNewTaskText] = useState("");
+src/pages/CoStudyRoom.tsx:58:  const audioRef = useRef<HTMLAudioElement>(null);
+src/pages/CoStudyRoom.tsx:59:  const [ambientTrack, setAmbientTrack] = useState(AMBIENT_TRACKS[0]);
+src/pages/CoStudyRoom.tsx:61:  const lastNudgeAtRef = useRef(0);
+src/pages/CoStudyRoom.tsx:62:  const [nudgeToast, setNudgeToast] = useState<string | null>(null);
+src/pages/CoStudyRoom.tsx:65:  const navigate = useNavigate();
+src/pages/CoStudyRoom.tsx:67:  useEffect(() => {
+src/pages/CoStudyRoom.tsx:82:  useEffect(() => {
+src/pages/CoStudyRoom.tsx:148:  useEffect(() => {
+src/pages/CoStudyRoom.tsx:179:  useEffect(() => {
+src/pages/CoStudyRoom.tsx:190:  useEffect(() => {
+src/pages/CoStudyRoom.tsx:251:  const toggleTask = useCallback((taskId: string) => {
+src/pages/CoStudyRoom.tsx:255:  const deleteTask = useCallback((taskId: string) => {
+src/pages/CategoryView.tsx:1:import React, { useEffect, useState } from 'react';
+src/pages/CategoryView.tsx:2:import { useParams, useNavigate } from 'react-router-dom';
+src/pages/CategoryView.tsx:12:  const { categoryName } = useParams();
+src/pages/CategoryView.tsx:14:  const [decks, setDecks] = useState<Deck[]>([]);
+src/pages/CategoryView.tsx:15:  const [loading, setLoading] = useState(true);
+src/pages/CategoryView.tsx:16:  const navigate = useNavigate();
+src/pages/CategoryView.tsx:18:  useEffect(() => {
+src/pages/StudyRoom.tsx:2:  useState,
+src/pages/StudyRoom.tsx:3:  useEffect,
+src/pages/StudyRoom.tsx:4:  useRef,
+src/pages/StudyRoom.tsx:5:  useCallback,
+src/pages/StudyRoom.tsx:6:  useMemo,
+src/pages/StudyRoom.tsx:8:import { useParams, Link, useNavigate } from "react-router-dom";
+src/pages/StudyRoom.tsx:58:import { useAICooldown } from "../lib/cooldown";
+src/pages/StudyRoom.tsx:94:import { useSoundContext } from "../components/SoundProvider";
+src/pages/StudyRoom.tsx:97:import { useTheme } from "../components/ThemeProvider";
+src/pages/StudyRoom.tsx:253:  const navigate = useNavigate();
+src/pages/StudyRoom.tsx:254:  const { isFixLagEnabled } = useTheme();
+src/pages/StudyRoom.tsx:255:  const { isSoundEnabled, toggleSound } = useSoundContext();
+src/pages/StudyRoom.tsx:256:  useEffect(() => {
+src/pages/StudyRoom.tsx:270:  const handleBack = (e?: React.MouseEvent) => {
+src/pages/StudyRoom.tsx:278:  const { cooldownRemaining, startCooldown } = useAICooldown(user);
+src/pages/StudyRoom.tsx:279:  const { deckId: rawDeckId } = useParams();
+src/pages/StudyRoom.tsx:281:  const [isLoading, setIsLoading] = useState(true);
+src/pages/StudyRoom.tsx:282:  const [rawDeck, setRawDeck] = useState<any>(() => store.getDeck(deckId));
+src/pages/StudyRoom.tsx:283:  const [personalCardStates, setPersonalCardStates] = useState<any[]>([]);
+src/pages/StudyRoom.tsx:284:  const [accessDenied, setAccessDenied] = useState(false);
+src/pages/StudyRoom.tsx:285:  const [isOfflineSaved, setIsOfflineSaved] = useState(false);
+src/pages/StudyRoom.tsx:288:  const [scratchpadText, setScratchpadText] = useState("");
+src/pages/StudyRoom.tsx:289:  const [isNotesSaving, setIsNotesSaving] = useState(false);
+src/pages/StudyRoom.tsx:290:  const [lastNotesSavedTime, setLastNotesSavedTime] = useState<string | null>(
+src/pages/StudyRoom.tsx:294:  useEffect(() => {
+src/pages/StudyRoom.tsx:305:  const unsubDeckRef = useRef<(() => void) | null>(null);
+src/pages/StudyRoom.tsx:306:  useEffect(() => {
+src/pages/StudyRoom.tsx:576:  useEffect(() => {
+src/pages/StudyRoom.tsx:583:  const unsubCardStatesRef = useRef<(() => void) | null>(null);
+src/pages/StudyRoom.tsx:584:  useEffect(() => {
+src/pages/StudyRoom.tsx:630:  const deck = useMemo(() => {
+src/pages/StudyRoom.tsx:695:  useEffect(() => {
+src/pages/StudyRoom.tsx:722:  useEffect(() => {
+src/pages/StudyRoom.tsx:766:  useEffect(() => {
+src/pages/StudyRoom.tsx:801:  const [studyQueue, setStudyQueue] = useState<Flashcard[]>([]);
+src/pages/StudyRoom.tsx:802:  const [currentIndex, setCurrentIndex] = useState(0);
+src/pages/StudyRoom.tsx:803:  const [isFlipped, setIsFlipped] = useState(false);
+src/pages/StudyRoom.tsx:804:  const [isClozeMode, setIsClozeMode] = useState(() => {
+src/pages/StudyRoom.tsx:807:  const [isHintRevealed, setIsHintRevealed] = useState(false);
+src/pages/StudyRoom.tsx:808:  const [finished, setFinished] = useState(false);
+src/pages/StudyRoom.tsx:809:  const [isListModalOpen, setIsListModalOpen] = useState(false);
+src/pages/StudyRoom.tsx:810:  const [listSearchQuery, setListSearchQuery] = useState("");
+src/pages/StudyRoom.tsx:811:  const [isGeneratingCloze, setIsGeneratingCloze] = useState(false);
+src/pages/StudyRoom.tsx:813:  useEffect(() => {
+src/pages/StudyRoom.tsx:822:  const [sessionCorrectCount, setSessionCorrectCount] = useState(0);
+src/pages/StudyRoom.tsx:823:  const [sessionMasteryGained, setSessionMasteryGained] = useState(0);
+src/pages/StudyRoom.tsx:824:  const [sessionStartTime] = useState(() => Date.now());
+src/pages/StudyRoom.tsx:825:  const [sessionTimeSpent, setSessionTimeSpent] = useState(0);
+src/pages/StudyRoom.tsx:826:  const [sessionHistory, setSessionHistory] = useState<
+src/pages/StudyRoom.tsx:838:  const [isEditing, setIsEditing] = useState(false);
+src/pages/StudyRoom.tsx:839:  const [editFront, setEditFront] = useState("");
+src/pages/StudyRoom.tsx:840:  const [editBack, setEditBack] = useState("");
+src/pages/StudyRoom.tsx:841:  const [editExampleSentence, setEditExampleSentence] = useState("");
+src/pages/StudyRoom.tsx:842:  const [isUpdatingCard, setIsUpdatingCard] = useState(false);
+src/pages/StudyRoom.tsx:843:  const [editSuccessMessage, setEditSuccessMessage] = useState<string | null>(
+src/pages/StudyRoom.tsx:847:  const [deleteCountdown, setDeleteCountdown] = useState<number | null>(null);
+src/pages/StudyRoom.tsx:848:  const deleteTimerRef = useRef<NodeJS.Timeout | null>(null);
+src/pages/StudyRoom.tsx:850:  const cancelDeleteCountdown = useCallback((e?: React.MouseEvent) => {
+src/pages/StudyRoom.tsx:859:  useEffect(() => {
+src/pages/StudyRoom.tsx:865:  useEffect(() => {
+src/pages/StudyRoom.tsx:873:  const [deckEditTitle, setDeckEditTitle] = useState("");
+src/pages/StudyRoom.tsx:874:  const [deckEditSubject, setDeckEditSubject] = useState("");
+src/pages/StudyRoom.tsx:875:  const [isEditingMetadata, setIsEditingMetadata] = useState(false);
+src/pages/StudyRoom.tsx:876:  const [isSavingMetadata, setIsSavingMetadata] = useState(false);
+src/pages/StudyRoom.tsx:878:    useState(false);
+src/pages/StudyRoom.tsx:880:  const existingSubjects = useMemo(() => {
+src/pages/StudyRoom.tsx:906:  const canEditDeck = useMemo(() => {
+src/pages/StudyRoom.tsx:929:  useEffect(() => {
+src/pages/StudyRoom.tsx:1007:  useEffect(() => {
+src/pages/StudyRoom.tsx:1039:  const [deepExplanation, setDeepExplanation] = useState<string | null>(null);
+src/pages/StudyRoom.tsx:1040:  const [isSerif, setIsSerif] = useState(true);
+src/pages/StudyRoom.tsx:1041:  const [isPinned, setIsPinned] = useState(false);
+src/pages/StudyRoom.tsx:1042:  const [isMinimized, setIsMinimized] = useState(false);
+src/pages/StudyRoom.tsx:1043:  const [isExtracting, setIsExtracting] = useState(false);
+src/pages/StudyRoom.tsx:1044:  const [activeAgent, setActiveAgent] = useState<2 | 3>(2);
+src/pages/StudyRoom.tsx:1045:  const [quote] = useState(
+src/pages/StudyRoom.tsx:1049:  const [studyMode, setStudyMode] = useState<"all" | "weak">("all");
+src/pages/StudyRoom.tsx:1050:  const [weakCardIds, setWeakCardIds] = useState<string[]>([]);
+src/pages/StudyRoom.tsx:1051:  const [showRemindToast, setShowRemindToast] = useState(false);
+src/pages/StudyRoom.tsx:1055:  const [timerSeconds, setTimerSeconds] = useState(POMODORO_MINS * 60);
+src/pages/StudyRoom.tsx:1056:  const [isTimerRunning, setIsTimerRunning] = useState(false);
+src/pages/StudyRoom.tsx:1057:  const [isTimerFinished, setIsTimerFinished] = useState(false);
+src/pages/StudyRoom.tsx:1059:  useEffect(() => {
+src/pages/StudyRoom.tsx:1090:  useEffect(() => {
+src/pages/StudyRoom.tsx:1118:  const queueInitDeckIdRef = useRef<string | null>(null);
+src/pages/StudyRoom.tsx:1120:  useEffect(() => {
+src/pages/StudyRoom.tsx:1174:  useEffect(() => {
+src/pages/StudyRoom.tsx:1185:  useEffect(() => {
+src/pages/StudyRoom.tsx:1189:  useEffect(() => {
+src/pages/StudyRoom.tsx:1244:  useEffect(() => {
+src/pages/StudyRoom.tsx:1282:  const executeActiveCardDeletion = useCallback(async () => {
+src/pages/StudyRoom.tsx:1335:  const startDeleteCountdown = useCallback(
+src/pages/StudyRoom.tsx:1336:    (e: React.MouseEvent) => {
+src/pages/StudyRoom.tsx:1364:    e?: React.MouseEvent,
+src/pages/StudyRoom.tsx:1415:  const handleGenerateAICloze = async (e: React.MouseEvent) => {
+src/pages/StudyRoom.tsx:1587:  const handleReportError = useCallback(async () => {
+src/pages/StudyRoom.tsx:1609:  const handleMark = useCallback(
+src/pages/StudyRoom.tsx:1705:  const handlePrevCard = useCallback(() => {
+src/pages/StudyRoom.tsx:1714:  const handleNextCard = useCallback(() => {
+src/pages/StudyRoom.tsx:1726:  useEffect(() => {
+src/pages/StudyRoom.tsx:1979:  const handleEditOpen = (e: React.MouseEvent) => {
+src/pages/StudyRoom.tsx:1987:  const handleSaveEdit = async (e: React.MouseEvent) => {
+src/pages/StudyRoom.tsx:2126:  const handleVirtualPlayCard = useCallback((c: Flashcard) => {
+src/pages/StudyRoom.tsx:2137:  const filteredCards = useMemo(() => {
+src/pages/StudyRoom.tsx:2149:  const handleSelectCardFromList = useCallback(
+src/pages/StudyRoom.tsx:2177:  const handleVirtualEditCard = useCallback((c: Flashcard) => {
+src/pages/StudyRoom.tsx:2192:  const handleVirtualDeleteCard = useCallback(
+src/pages/AdminCreateCards.tsx:2:import React, { useState, useEffect, useRef, useCallback , useMemo } from "react";
+src/pages/AdminCreateCards.tsx:3:import { useNavigate } from "react-router-dom";
+src/pages/AdminCreateCards.tsx:78:  const navigate = useNavigate();
+src/pages/AdminCreateCards.tsx:79:  const [currentUser, setCurrentUser] = useState(store.getCurrentUser());
+src/pages/AdminCreateCards.tsx:80:  const [isAuthorized, setIsAuthorized] = useState(false);
+src/pages/AdminCreateCards.tsx:81:  const [decks, setDecks] = useState<Deck[]>(store.getDecks());
+src/pages/AdminCreateCards.tsx:84:  const [selectedDeckId, setSelectedDeckId] = useState<string>("new");
+src/pages/AdminCreateCards.tsx:85:  const [newDeckTitle, setNewDeckTitle] = useState("");
+src/pages/AdminCreateCards.tsx:86:  const [newDeckSubject, setNewDeckSubject] = useState("");
+src/pages/AdminCreateCards.tsx:87:  const [isCreatingNewSubjectAdmin, setIsCreatingNewSubjectAdmin] = useState(false);
+src/pages/AdminCreateCards.tsx:89:  const existingSubjects = useMemo(() => {
+src/pages/AdminCreateCards.tsx:116:  const [front, setFront] = useState("");
+src/pages/AdminCreateCards.tsx:117:  const [wordForm, setWordForm] = useState("");
+src/pages/AdminCreateCards.tsx:118:  const [back, setBack] = useState("");
+src/pages/AdminCreateCards.tsx:121:  const [batchCards, setBatchCards] = useState<Flashcard[]>([]);
+src/pages/AdminCreateCards.tsx:122:  const [editingBatchCardId, setEditingBatchCardId] = useState<string | null>(
+src/pages/AdminCreateCards.tsx:127:  const [isSaving, setIsSaving] = useState(false);
+src/pages/AdminCreateCards.tsx:128:  const [successMsg, setSuccessMsg] = useState("");
+src/pages/AdminCreateCards.tsx:129:  const frontInputRef = useRef<HTMLInputElement>(null);
+src/pages/AdminCreateCards.tsx:130:  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+src/pages/AdminCreateCards.tsx:161:  useEffect(() => {
+src/pages/AdminCreateCards.tsx:176:  const handleEditCard = useCallback(
+src/pages/AdminCreateCards.tsx:189:  const handleDeleteCard = useCallback(
+src/pages/AdminCreateCards.tsx:203:  const handleCancelEdit = useCallback(() => {
+src/pages/AdminCreateCards.tsx:211:  const handleAddOrUpdateCardToBatch = useCallback(
+src/pages/SetupProfileScreen.tsx:1:import React, { useState , useEffect } from 'react';
+src/pages/SetupProfileScreen.tsx:2:import { useNavigate, useLocation } from 'react-router-dom';
+src/pages/SetupProfileScreen.tsx:12:  const [username, setUsername] = useState(() => {
+src/pages/SetupProfileScreen.tsx:15:  const [password, setPassword] = useState('');
+src/pages/SetupProfileScreen.tsx:16:  const [showPassword, setShowPassword] = useState(false);
+src/pages/SetupProfileScreen.tsx:17:  const [adminKey, setAdminKey] = useState('');
+src/pages/SetupProfileScreen.tsx:18:  const [showAdminKey, setShowAdminKey] = useState(false);
+src/pages/SetupProfileScreen.tsx:19:  const [error, setError] = useState<string | null>(null);
+src/pages/SetupProfileScreen.tsx:20:  const [isLoading, setIsLoading] = useState(false);
+src/pages/SetupProfileScreen.tsx:21:  const [showDebug, setShowDebug] = useState(false);
+src/pages/SetupProfileScreen.tsx:22:  const [photoUrl, setPhotoUrl] = useState(() => {
+src/pages/SetupProfileScreen.tsx:25:  const fileInputRef = React.useRef<HTMLInputElement>(null);
+src/pages/SetupProfileScreen.tsx:26:  const navigate = useNavigate();
+src/pages/SetupProfileScreen.tsx:28:  useEffect(() => {
+src/pages/TeacherDashboard.tsx:2:import React, { useState, useEffect, useRef, useMemo } from "react";
+src/pages/TeacherDashboard.tsx:51:  const [showAdminMonitor, setShowAdminMonitor] = useState(() => {
+src/pages/TeacherDashboard.tsx:55:  useEffect(() => {
+src/pages/TeacherDashboard.tsx:61:  const [showConfirmDelete, setShowConfirmDelete] = useState<string | null>(
+src/pages/TeacherDashboard.tsx:64:  const [isDeletingSet, setIsDeletingSet] = useState(false);
+src/pages/TeacherDashboard.tsx:66:  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
+src/pages/TeacherDashboard.tsx:67:  const [selectedDeckIds, setSelectedDeckIds] = useState<string[]>([]);
+src/pages/TeacherDashboard.tsx:70:    useState(false);
+src/pages/TeacherDashboard.tsx:71:  const [isBulkDeletingDecks, setIsBulkDeletingDecks] = useState(false);
+src/pages/TeacherDashboard.tsx:74:    useState<"hard" | "soft" | null>(null);
+src/pages/TeacherDashboard.tsx:75:  const [isBulkDeletingStudents, setIsBulkDeletingStudents] = useState(false);
+src/pages/TeacherDashboard.tsx:77:  const [dbUsers, setDbUsers] = useState<any[]>([]);
+src/pages/TeacherDashboard.tsx:78:  const [localDecks, setLocalDecks] = useState<any[]>(() => store.getDecks());
+src/pages/TeacherDashboard.tsx:79:  const [isLibraryExpanded, setIsLibraryExpandedState] = useState(() => {
+src/pages/TeacherDashboard.tsx:94:  const [libraryViewMode, setLibraryViewModeState] = useState<
+src/pages/TeacherDashboard.tsx:108:  const [editingCategory, setEditingCategory] = useState<string | null>(null);
+src/pages/TeacherDashboard.tsx:109:  const [newCategoryName, setNewCategoryName] = useState("");
+src/pages/TeacherDashboard.tsx:111:  const [editingDeckData, setEditingDeckData] = useState<{
+src/pages/TeacherDashboard.tsx:116:  const [isSavingCategoryName, setIsSavingCategoryName] = useState(false);
+src/pages/TeacherDashboard.tsx:117:  const [expandedCategories, setExpandedCategories] = useState<
+src/pages/TeacherDashboard.tsx:125:  const [showMoveBulkModal, setShowMoveBulkModal] = useState(false);
+src/pages/TeacherDashboard.tsx:126:  const [targetMoveCategory, setTargetMoveCategory] = useState("");
+src/pages/TeacherDashboard.tsx:127:  const [isNewCategoryInput, setIsNewCategoryInput] = useState(false);
+src/pages/TeacherDashboard.tsx:128:  const [isMovingBulk, setIsMovingBulk] = useState(false);
+src/pages/TeacherDashboard.tsx:130:  const [enableBulkRename, setEnableBulkRename] = useState(false);
+src/pages/TeacherDashboard.tsx:131:  const [renameFixedName, setRenameFixedName] = useState("");
+src/pages/TeacherDashboard.tsx:132:  const [renameStartIndex, setRenameStartIndex] = useState<number | "">(1);
+src/pages/TeacherDashboard.tsx:135:  const [lessonTopic, setLessonTopic] = useState("");
+src/pages/TeacherDashboard.tsx:136:  const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
+src/pages/TeacherDashboard.tsx:137:  const [lessonPlanData, setLessonPlanData] = useState<any>(null);
+src/pages/TeacherDashboard.tsx:138:  const [lessonError, setLessonError] = useState<string | null>(null);
+src/pages/TeacherDashboard.tsx:140:  const [isAiSystemBusy, setIsAiSystemBusy] = useState(false);
+src/pages/TeacherDashboard.tsx:141:  const [aiBusyType, setAiBusyType] = useState<string | null>(null);
+src/pages/TeacherDashboard.tsx:144:  const [rewardTargetId, setRewardTargetId] = useState("");
+src/pages/TeacherDashboard.tsx:145:  const [rewardPoints, setRewardPoints] = useState("");
+src/pages/TeacherDashboard.tsx:146:  const [rewardLevels, setRewardLevels] = useState("");
+src/pages/TeacherDashboard.tsx:147:  const [rewardStreak, setRewardStreak] = useState("");
+src/pages/TeacherDashboard.tsx:148:  const [rewardStudyMinutes, setRewardStudyMinutes] = useState("");
+src/pages/TeacherDashboard.tsx:149:  const [rewardTop1Weeks, setRewardTop1Weeks] = useState("");
+src/pages/TeacherDashboard.tsx:150:  const [isDispatchingReward, setIsDispatchingReward] = useState(false);
+src/pages/TeacherDashboard.tsx:151:  const [rewardMessage, setRewardMessage] = useState("");
+src/pages/TeacherDashboard.tsx:243:  useEffect(() => {
+src/pages/TeacherDashboard.tsx:297:  useEffect(() => {
+src/pages/TeacherDashboard.tsx:303:  const [adminKey, setAdminKeyState] = useState(
+src/pages/TeacherDashboard.tsx:311:  useEffect(() => {
+src/pages/TeacherDashboard.tsx:323:  const [planTitle, setPlanTitle] = useState("");
+src/pages/TeacherDashboard.tsx:324:  const [planSubject, setPlanSubject] = useState("");
+src/pages/TeacherDashboard.tsx:325:  const [isAddToExisting, setIsAddToExisting] = useState(false);
+src/pages/TeacherDashboard.tsx:326:  const [selectedExistingDeckId, setSelectedExistingDeckId] = useState("");
+src/pages/TeacherDashboard.tsx:328:    useState(false);
+src/pages/TeacherDashboard.tsx:329:  const [isSavingPlan, setIsSavingPlan] = useState(false);
+src/pages/TeacherDashboard.tsx:330:  const isSavingPlanRef = useRef(false);
+src/pages/TeacherDashboard.tsx:331:  const isGeneratingPlanRef = useRef(false);
+src/pages/TeacherDashboard.tsx:333:  const existingSubjects = useMemo(() => {
+src/pages/TeacherDashboard.tsx:491:  const [isInitialLoading, setIsInitialLoading] = useState(
+src/pages/TeacherDashboard.tsx:495:  const unsubUsersRef = useRef<(() => void) | null>(null);
+src/pages/TeacherDashboard.tsx:496:  useEffect(() => {
+src/pages/TeacherDashboard.tsx:545:  const unsubDecksRef = useRef<(() => void) | null>(null);
+src/pages/TeacherDashboard.tsx:546:  useEffect(() => {
+src/pages/TeacherDashboard.tsx:633:  const [studentToDelete, setStudentToDelete] = useState<any | null>(null);
+src/pages/TeacherDashboard.tsx:634:  const [isDeletingStudent, setIsDeletingStudent] = useState(false);
+src/pages/TeacherDashboard.tsx:635:  const [deleteMode, setDeleteMode] = useState<"hard" | "soft">("hard");
+src/pages/TeacherDashboard.tsx:636:  const [isSyncingGhostUsers, setIsSyncingGhostUsers] = useState(false);
+src/pages/TeacherDashboard.tsx:637:  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+src/pages/TeacherDashboard.tsx:639:  const generatedMarkdown = useMemo(() => {
+src/pages/ApiHealthMonitor.tsx:2:import React, { useState, useEffect, useRef, useMemo } from "react";
+src/pages/ApiHealthMonitor.tsx:32:import { useSystemConfig } from "../hooks/useSystemConfig";
+src/pages/ApiHealthMonitor.tsx:67:  const svgRef = useRef<SVGSVGElement>(null);
+src/pages/ApiHealthMonitor.tsx:69:  useEffect(() => {
+src/pages/ApiHealthMonitor.tsx:139:  const [keys, setKeys] = useState<KeyState[]>([]);
+src/pages/ApiHealthMonitor.tsx:140:  const [isLoading, setIsLoading] = useState(true);
+src/pages/ApiHealthMonitor.tsx:141:  const [totalKeys, setTotalKeys] = useState(0);
+src/pages/ApiHealthMonitor.tsx:142:  const [currentIndex, setCurrentIndex] = useState(0);
+src/pages/ApiHealthMonitor.tsx:143:  const [error, setError] = useState("");
+src/pages/ApiHealthMonitor.tsx:144:  const [isPolling, setIsPolling] = useState(true);
+src/pages/ApiHealthMonitor.tsx:145:  const [logs, setLogs] = useState<RotationLog[]>([]);
+src/pages/ApiHealthMonitor.tsx:146:  const [activeTab, setActiveTab] = useState<"monitor" | "logs" | "health">(
+src/pages/ApiHealthMonitor.tsx:149:  const [logFilter, setLogFilter] = useState<"all" | "429">("all");
+src/pages/ApiHealthMonitor.tsx:152:  const [openRouterEnabled, setOpenRouterEnabled] = useState(
+src/pages/ApiHealthMonitor.tsx:155:  const [groqEnabled, setGroqEnabled] = useState(
+src/pages/ApiHealthMonitor.tsx:158:  const [geminiEnabled, setGeminiEnabled] = useState(
+src/pages/ApiHealthMonitor.tsx:161:  const [deepInfraEnabled, setDeepInfraEnabled] = useState(
+src/pages/ApiHealthMonitor.tsx:164:  const [isUpdatingToggles, setIsUpdatingToggles] = useState(false);
+src/pages/ApiHealthMonitor.tsx:165:  const [deepInfraKeys, setDeepInfraKeys] = useState<KeyState[]>([]);
+src/pages/ApiHealthMonitor.tsx:167:  const [mockKeys, setMockKeys] = useState<any[]>(() => {
+src/pages/ApiHealthMonitor.tsx:182:  useEffect(() => {
+src/pages/ApiHealthMonitor.tsx:211:  const [groqKeys, setGroqKeys] = useState<KeyState[]>([]);
+src/pages/ApiHealthMonitor.tsx:212:  const [totalGroqKeys, setTotalGroqKeys] = useState(0);
+src/pages/ApiHealthMonitor.tsx:213:  const [currentGroqIndex, setCurrentGroqIndex] = useState(1);
+src/pages/ApiHealthMonitor.tsx:214:  const [groqLogs, setGroqLogs] = useState<RotationLog[]>([]);
+src/pages/ApiHealthMonitor.tsx:217:  const [openRouterKeys, setOpenRouterKeys] = useState<KeyState[]>([]);
+src/pages/ApiHealthMonitor.tsx:218:  const [totalOpenRouterKeys, setTotalOpenRouterKeys] = useState(0);
+src/pages/ApiHealthMonitor.tsx:219:  const [currentOpenRouterIndex, setCurrentOpenRouterIndex] = useState(0);
+src/pages/ApiHealthMonitor.tsx:220:  const [openRouterLogs, setOpenRouterLogs] = useState<RotationLog[]>([]);
+src/pages/ApiHealthMonitor.tsx:221:  const prevOpenRouterKeysRef = useRef<KeyState[]>([]);
+src/pages/ApiHealthMonitor.tsx:222:  const prevGroqKeysRef = useRef<KeyState[]>([]);
+src/pages/ApiHealthMonitor.tsx:224:  const [usageHistory, setUsageHistory] = useState<Record<number, number[]>>(
+src/pages/ApiHealthMonitor.tsx:227:  const [queueStatus, setQueueStatus] = useState(apiManager.getStatus());
+src/pages/ApiHealthMonitor.tsx:228:  const prevKeysRef = useRef<KeyState[]>([]);
+src/pages/ApiHealthMonitor.tsx:230:  const { config, updateConfig } = useSystemConfig();
+src/pages/ApiHealthMonitor.tsx:231:  const [editingEmail, setEditingEmail] = useState("");
+src/pages/ApiHealthMonitor.tsx:232:  const [isEditingEmail, setIsEditingEmail] = useState(false);
+src/pages/ApiHealthMonitor.tsx:233:  const [isSavingEmail, setIsSavingEmail] = useState(false);
+src/pages/ApiHealthMonitor.tsx:235:  useEffect(() => {
+src/pages/ApiHealthMonitor.tsx:254:  const [serverHealth, setServerHealth] = useState<any>(null);
+src/pages/ApiHealthMonitor.tsx:255:  const [networkLogs, setNetworkLogs] = useState<NetworkHealthLog[]>([]);
+src/pages/ApiHealthMonitor.tsx:256:  const [isTestingHealth, setIsTestingHealth] = useState(false);
+src/pages/ApiHealthMonitor.tsx:257:  const [testResponse, setTestResponse] = useState<any>(null);
+src/pages/ApiHealthMonitor.tsx:541:  const [isResettingKeys, setIsResettingKeys] = useState(false);
+src/pages/ApiHealthMonitor.tsx:542:  const [resetSuccess, setResetSuccess] = useState(false);
+src/pages/ApiHealthMonitor.tsx:575:  const clientLatencyAvg = useMemo(() => {
+src/pages/ApiHealthMonitor.tsx:583:  useEffect(() => {
+src/pages/ApiHealthMonitor.tsx:746:  useEffect(() => {
+src/pages/ApiHealthMonitor.tsx:789:  useEffect(() => {
+src/pages/ApiHealthMonitor.tsx:1928:  const [adminKey, setAdminKey] = useState("");
+src/pages/ApiHealthMonitor.tsx:1929:  const [isAuthenticated, setIsAuthenticated] = useState(false);
+src/pages/ApiHealthMonitor.tsx:1931:  useEffect(() => {
+src/pages/ApiHealthMonitor.tsx:1943:  const [error, setError] = useState("");
+src/pages/ApiHealthMonitor.tsx:1944:  const [isLoading, setIsLoading] = useState(false);
+src/pages/ApiHealthMonitor.tsx:1975:  const [isCommandCenterOpen, setIsCommandCenterOpen] = useState(false);
+src/vibe-sandbox/VibeApiHealthMonitor.tsx:1:import React, { useState, useEffect } from "react";
+src/vibe-sandbox/VibeApiHealthMonitor.tsx:13:  const [keys, setKeys] = useState<VibeKeyState[]>([]);
+src/vibe-sandbox/VibeApiHealthMonitor.tsx:14:  const [loading, setLoading] = useState(true);
+src/vibe-sandbox/VibeApiHealthMonitor.tsx:28:  useEffect(() => {
+src/vibe-sandbox/VibeApiHealthMonitor.tsx:92:  const [timeLeft, setTimeLeft] = useState<number>(0);
+src/vibe-sandbox/VibeApiHealthMonitor.tsx:94:  useEffect(() => {
+src/App.tsx:2:import React, { useState, useEffect, lazy, Suspense } from "react";
+src/App.tsx:7:  useNavigate,
+src/App.tsx:8:  useLocation,
+src/App.tsx:34:import { useTheme, ThemeProvider } from "./components/ThemeProvider";
+src/App.tsx:35:import { SoundProvider, useSoundContext } from "./components/SoundProvider";
+src/App.tsx:154:  const { isFixLagEnabled } = useTheme();
+src/App.tsx:165:  const { isFixLagEnabled } = useTheme();
+src/App.tsx:215:  const { theme, toggleTheme, isFixLagEnabled, toggleFixLag } = useTheme();
+src/App.tsx:216:  const { isSoundEnabled, toggleSound } = useSoundContext();
+src/App.tsx:217:  const navigate = useNavigate();
+src/App.tsx:218:  const location = useLocation();
+src/App.tsx:220:  const [user, setUser] = useState<any>(null);
+src/App.tsx:221:  const [currentUserRank, setCurrentUserRank] = useState<number | null>(null);
+src/App.tsx:222:  const [isAuthLoading, setIsAuthLoading] = useState(true);
+src/App.tsx:223:  const [pulse, setPulse] = useState(false);
+src/App.tsx:229:  const [isAdminMode, setIsAdminMode] = useState(
+src/App.tsx:232:  const [showSettingsModal, setShowSettingsModal] = useState(false);
+src/App.tsx:233:  const [showShortcutsModal, setShowShortcutsModal] = useState(false);
+src/App.tsx:234:  const [isSyncing, setIsSyncing] = useState(false);
+src/App.tsx:235:  const [syncSuccess, setSyncSuccess] = useState(false);
+src/App.tsx:236:  const [adminKeyInput, setAdminKeyInput] = useState("");
+src/App.tsx:237:  const [isVerifyingAdmin, setIsVerifyingAdmin] = useState(false);
+src/App.tsx:238:  const [adminVerifyResult, setAdminVerifyResult] = useState<{
+src/App.tsx:243:  const [showSyncConfirm, setShowSyncConfirm] = useState(false);
+src/App.tsx:244:  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+src/App.tsx:246:  const [isDeepWorkMode, setIsDeepWorkMode] = useState(
+src/App.tsx:302:  const [isFullscreen, setIsFullscreen] = useState(false);
+src/App.tsx:304:  useEffect(() => {
+src/App.tsx:308:  useEffect(() => {
+src/App.tsx:416:  useEffect(() => {
+src/App.tsx:436:  useEffect(() => {
+src/App.tsx:454:  const [notifReminder, setNotifReminder] = useState(() => {
+src/App.tsx:498:  useEffect(() => {
+src/App.tsx:520:  useEffect(() => {
+src/App.tsx:579:  const [appFontSize, setAppFontSize] = useState<number>(() => {
+src/App.tsx:584:  const [appUiDensity, setAppUiDensity] = useState<"comfortable" | "compact">(
+src/App.tsx:593:  useEffect(() => {
+src/App.tsx:603:  useEffect(() => {
+src/App.tsx:610:  useEffect(() => {
+src/App.tsx:655:  const [contrastStatus, setContrastStatus] = useState<{
+src/App.tsx:781:  const [autofixFeedback, setAutofixFeedback] = useState<string | null>(null);
+src/App.tsx:947:  useEffect(() => {
+src/App.tsx:955:  useEffect(() => {
+src/App.tsx:964:  useEffect(() => {
+src/App.tsx:1121:  useEffect(() => {
+src/App.tsx:1177:  useEffect(() => {
+src/App.tsx:2114:  const location = useLocation();

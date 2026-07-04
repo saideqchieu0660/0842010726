@@ -1,5 +1,13 @@
 # Feature Registry
 
+## Architecture Pending Implementation
+1. **Multi-Level Folder System & Hierarchical Skill Tree**
+   - Status: Proposed (ADR-002)
+   - Description: Transition from flat deck organization to a nested folder structure (up to 4 levels) with drag-and-drop, virtualized rendering, permission inheritance, and hierarchical progression roll-ups in the Skill Tree.
+2. **Home Library Classification**
+   - Status: Proposed (ADR-003)
+   - Description: Organize the Home learning library by ownership into three top-level categories: My Resources, Shared With Me, and Community Library, with robust search and sorting.
+
 ## Core Features
 1. **Flashcard System (Spaced Repetition)**
    - Status: Core

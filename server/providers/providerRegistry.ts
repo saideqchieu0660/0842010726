@@ -77,12 +77,17 @@ export class ProviderRegistry {
     this.addUniqueKeys('cerebras', envCerebras);
     this.addUniqueKeys('openrouter', envOpenRouter);
 
+    // Limit to exactly 3 keys for Google and Cerebras per user request, and disable OpenRouter completely
+    this.config.google = this.config.google.slice(0, 3);
+    this.config.cerebras = this.config.cerebras.slice(0, 3);
+    this.config.openrouter = []; // Disabled
+
     // Fallbacks if empty
     if (this.config.google.length === 0) {
-       for(let i=1; i<=30; i++) this.config.google.push(`mock_google_key_${i}`);
+       for(let i=1; i<=3; i++) this.config.google.push(`mock_google_key_${i}`);
     }
     if (this.config.cerebras.length === 0) {
-       for(let i=1; i<=9; i++) this.config.cerebras.push(`mock_cerebras_key_${i}`);
+       for(let i=1; i<=3; i++) this.config.cerebras.push(`mock_cerebras_key_${i}`);
     }
   }
 

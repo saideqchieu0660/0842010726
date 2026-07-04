@@ -11,6 +11,8 @@ Henosis is an advanced, offline-capable, real-time educational platform designed
 - **Defensive Backend**: The Express server implements rigorous API key masking, quota monitoring, and request pacing to prevent cascade failures.
 
 ## Historical Context & Bootstrapping
+- **Home Library Classification Request**: An architectural shift to separate library resources by ownership (My Resources, Shared With Me, Community Library) was identified and documented in ADR-003, awaiting implementation post-bootstrap.
+- **Multi-Level Folder Refactoring Request**: A major architectural shift to support n-level (up to 4 levels) hierarchical folders for both Admin and User Libraries was identified and documented in ADR-002, awaiting implementation post-bootstrap.
 - **Initial Reconstruction**: This document was bootstrapped from a repository analysis on 2026-06-28. Prior history is inferred from repository structure and code metadata.
 
 ## Permanent Engineering Standards

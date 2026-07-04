@@ -28,3 +28,14 @@
 - **State Separation**: Fixed semantic logic flaw where "Unknown" (X marked) and "Review" (Bell marked) words were dangerously mixed in the same list. 
 - **Storage Migration**: Removed UI-based `remind_later_items` and `weak_cards_` local storage tracking in favor of a normalized `status` field (`"unknown" | "review" | "mastered"`) tightly integrated with the existing `cardsState` sync engine.
 - **Automated Data Normalization**: Added a silent runtime migration in `StudentDashboard` to automatically detect legacy disjointed interaction states and fold them into the unified `status` parameter, ensuring multi-device consistency.
+
+## [Architecture Design Phase] - 2026-07-01
+
+### Multi-Level Folder Architecture Proposed
+- Received request to refactor standard flat Deck architecture to support deep nesting (up to 4 levels) with inherited permissions, progression model roll-up, and advanced virtualization capabilities.
+- Added `docs/ADR/002-multi-level-folders.md` detailing the required database changes (`folder` collection, `parentId`), permission structures, and Skill Tree recursive rendering updates.
+
+### Home Library Classification Proposed
+- Received request to organize the Home learning library by ownership into: My Resources, Shared With Me, and Community Library.
+- Added `docs/ADR/003-home-library-classification.md` detailing the required query logic, UI restructuring, and visibility/permission badging.
+- **Enforced Security Policy**: Executed in SYSTEM BOOTSTRAP MODE. All structural plans have been successfully cataloged and mapped in the Feature Registry for execution once the repository lock is released. No production state changes or migrations were executed, strictly preserving existing user data formats and stability.

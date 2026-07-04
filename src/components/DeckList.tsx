@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect, useContext } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'motion/react';
-import { Play, BookOpen, Search, X, ChevronLeft, ChevronRight, Sparkles, Pin, PinOff, Clock, Check, Share2, Edit3, DownloadCloud, Folder, ChevronDown } from 'lucide-react';
+import { Play, BookOpen, Search, X, ChevronLeft, ChevronRight, Sparkles, Pin, PinOff, Clock, Check, Share2, Edit3, DownloadCloud, Folder, ChevronDown, Users, Globe, Lock, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { Deck, store } from '../lib/store';
@@ -232,9 +232,7 @@ const HierarchicalCategoryRenderer = ({ node, isRoot = false }: { node: Hierarch
                         
                         <div className="flex flex-wrap items-center gap-4 mb-8">
                           <span className="text-base sm:text-l font-mono font-black opacity-85 uppercase tracking-widest leading-relaxed">{deck.subject || "Tự chọn"}</span>
-                          <span className="text-sm sm:text-base px-4 py-2.5 rounded-xl font-mono font-black uppercase tracking-wider bg-orange-500/15 text-orange-600 dark:text-orange-400 border-2 border-orange-500/20 leading-relaxed">
-                            {getCreatorLabel(deck)}
-                          </span>
+
                           <span className="flex items-center gap-1.5 text-sm sm:text-base px-4 py-2.5 rounded-xl font-mono font-black uppercase tracking-wider bg-purple-500/15 text-purple-600 dark:text-purple-400 border-2 border-purple-500/20 leading-relaxed">
                             {deck.cards?.length || 0} Thẻ
                           </span>
@@ -603,7 +601,7 @@ const safeSetItem = (key: string, value: string) => {
 
   const getCreatorLabel = (d: Deck) => {
     const systemDecks = ["deck_1", "deck_phil_2", "deck_math_1", "deck_math_2", "deck_physics_1", "deck_physics_2", "daily-quest", "remind-later-deck"];
-    if (systemDecks.includes(d.id) || !d.createdBy || d.createdBy === "system") {
+    if (systemDecks.includes(d.id) || !d.createdBy || d.createdBy === "system" || d.isOfficial) {
       return "Hệ thống";
     }
     const currentUser = store.getCurrentUser();
@@ -614,6 +612,30 @@ const safeSetItem = (key: string, value: string) => {
       return `Admin - ${(d as any).creatorName || "CoStudy Admin"}`;
     }
     return (d as any).creatorName ? `Bởi ${(d as any).creatorName}` : "Học viên";
+  };
+
+  const renderDeckMeta = (deck: Deck) => {
+    const isPublic = deck.visibility === 'public';
+    const isShared = deck.sharedWith && deck.sharedWith.length > 0;
+    return (
+      <>
+        <span className="text-sm sm:text-base px-4 py-2.5 rounded-xl font-mono font-black uppercase tracking-wider bg-orange-500/15 text-orange-600 dark:text-orange-400 border-2 border-orange-500/20 leading-relaxed">
+          {getCreatorLabel(deck)}
+        </span>
+        {(deck.visibility || deck.isOfficial) && (
+          <span className="flex items-center gap-1 text-sm sm:text-base px-4 py-2.5 rounded-xl font-mono font-black uppercase tracking-wider bg-blue-500/15 text-blue-600 dark:text-blue-400 border-2 border-blue-500/20 leading-relaxed">
+            {deck.isOfficial ? <ShieldCheck className="w-4 h-4" /> : (isPublic ? <Globe className="w-4 h-4" /> : (isShared ? <Users className="w-4 h-4" /> : <Lock className="w-4 h-4" />))}
+            {deck.isOfficial ? "Official" : (isPublic ? "Public" : (isShared ? "Shared" : "Private"))}
+          </span>
+        )}
+        {deck.updatedAt && (
+          <span className="text-sm sm:text-base px-4 py-2.5 rounded-xl font-mono font-black uppercase tracking-wider bg-zinc-500/15 text-zinc-600 dark:text-zinc-400 border-2 border-zinc-500/20 leading-relaxed flex items-center gap-1">
+            <Clock className="w-4 h-4" />
+            {new Date(deck.updatedAt).toLocaleDateString()}
+          </span>
+        )}
+      </>
+    );
   };
 
   return (
@@ -945,9 +967,7 @@ const safeSetItem = (key: string, value: string) => {
                             
                             <div className="flex flex-wrap items-center gap-4 mb-8">
                               <span className="text-base sm:text-l font-mono font-black opacity-85 uppercase tracking-widest leading-relaxed">{deck.subject || "Tự chọn"}</span>
-                              <span className="text-sm sm:text-base px-4 py-2.5 rounded-xl font-mono font-black uppercase tracking-wider bg-orange-500/15 text-orange-600 dark:text-orange-400 border-2 border-orange-500/20 leading-relaxed">
-                                {getCreatorLabel(deck)}
-                              </span>
+    
                               <span className="flex items-center gap-1.5 text-sm sm:text-base px-4 py-2.5 rounded-xl font-mono font-black uppercase tracking-wider bg-purple-500/15 text-purple-600 dark:text-purple-400 border-2 border-purple-500/20 leading-relaxed">
                                 {deck.cards?.length || 0} Thẻ
                               </span>
@@ -1052,9 +1072,7 @@ const safeSetItem = (key: string, value: string) => {
                       
                       <div className="flex flex-wrap items-center gap-4 mb-8">
                         <span className="text-base sm:text-xl font-mono font-black opacity-85 uppercase tracking-widest leading-relaxed">{deck.subject || "Tự chọn"}</span>
-                        <span className="text-sm sm:text-base px-4 py-2.5 rounded-xl font-mono font-black uppercase tracking-wider bg-orange-500/15 text-orange-600 dark:text-orange-400 border-2 border-orange-500/20 leading-relaxed">
-                          {getCreatorLabel(deck)}
-                        </span>
+                        {renderDeckMeta(deck)}
                         <span className="flex items-center gap-1.5 text-sm sm:text-base px-4 py-2.5 rounded-xl font-mono font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-2 border-emerald-500/20 leading-relaxed">
                           <Clock className="w-4 h-4" />
                           {estimatedMinutes > 0 ? `~${estimatedMinutes}p` : `<1p`}

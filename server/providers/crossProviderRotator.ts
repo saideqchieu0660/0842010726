@@ -36,6 +36,77 @@ export class CrossProviderRotator {
     }
   }
 
+  static async *executeStream(contents: any, config: ExecuteConfig = {}): AsyncGenerator<string, void, unknown> {
+    const isGoogle = this.globalProviderToggle === 0;
+    
+    // Toggle for next request regardless of success/failure
+    this.globalProviderToggle = (this.globalProviderToggle + 1) % 2;
+
+    if (isGoogle) {
+       try {
+         return yield* await this.executeGoogleStream(contents, config);
+       } catch (err: any) {
+         console.warn("Google provider failed in CrossProviderRotator, switching to Cerebras...", err);
+         return yield* await CerebrasRotator.executeStream(contents, config);
+       }
+    } else {
+       try {
+         return yield* await CerebrasRotator.executeStream(contents, config);
+       } catch (err: any) {
+         console.warn("Cerebras provider failed in CrossProviderRotator, switching to Google...", err);
+         return yield* await this.executeGoogleStream(contents, config);
+       }
+    }
+  }
+
+  private static async *executeGoogleStream(contents: any, config: ExecuteConfig = {}): AsyncGenerator<string, void, unknown> {
+    const states = HealthMonitor.getStates('google');
+    if (states.length === 0) throw new Error("No Google keys available.");
+    const maxAttempts = states.length;
+    let attempts = 0;
+
+    while (attempts < maxAttempts) {
+      const state = states[this.googleKeyIndex];
+      this.googleKeyIndex = (this.googleKeyIndex + 1) % states.length;
+      attempts++;
+
+      if (state.status === "HARD_LOCKED" || state.is_banned) continue;
+
+      let startedYielding = false;
+      try {
+        const ai = new GoogleGenAI({ apiKey: state.key });
+        const res = await ai.models.generateContentStream({
+           model: "gemini-2.5-flash",
+           contents: contents,
+           config: config
+        });
+        
+        let hasYielded = false;
+        for await (const chunk of res) {
+           hasYielded = true;
+           if (!startedYielding) {
+               HealthMonitor.reportUsage('google', state.index);
+               startedYielding = true;
+           }
+           if (chunk.text) {
+               yield chunk.text;
+           }
+        }
+        
+        return;
+      } catch (err: any) {
+        if (startedYielding) {
+           throw err; // if it failed mid-stream, don't try another key and corrupt output
+        }
+        const is429 = err.status === 429 || err.message?.includes("429") || err.message?.includes("quota");
+        const isFatal = err.status === 401 || err.status === 403 || err.message?.includes("API_KEY_INVALID");
+        HealthMonitor.reportError('google', state.index, is429, isFatal, err.message || err.toString());
+      }
+    }
+    
+    throw new Error("All Google keys exhausted or locked.");
+  }
+
   private static async executeGoogle(contents: any, config: ExecuteConfig = {}): Promise<string> {
     const states = HealthMonitor.getStates('google');
     if (states.length === 0) throw new Error("No Google keys available.");

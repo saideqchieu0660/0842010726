@@ -104,6 +104,10 @@ export interface Deck {
   creatorRole?: string;
   creatorName?: string;
   createdAt?: number | string;
+  updatedAt?: number | string;
+  visibility?: 'private' | 'public' | 'shared';
+  sharedWith?: string[]; // Array of user IDs or emails
+  isOfficial?: boolean;
 }
 
 export interface StudyGroup {

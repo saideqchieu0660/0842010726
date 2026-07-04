@@ -275,13 +275,13 @@ interface RotationLog {
 const rotationLogs: RotationLog[] = [];
 
 // Global API Feature Toggles with Cloud Persistence fallback
-let isOpenRouterEnabled = true;
+let isOpenRouterEnabled = false; // LEGACY DISABLED
 let isGroqEnabled = true;
 let isGeminiEnabled = true;
-let isDeepInfraEnabled = true;
+let isDeepInfraEnabled = false; // LEGACY DISABLED
 
 // Provider toggle aliases for explicit clarity
-const ENABLE_OPENROUTER = () => isOpenRouterEnabled;
+const ENABLE_OPENROUTER = () => false; // FORCE DISABLED
 const ENABLE_CEREBRAS = () => isGroqEnabled;
 const ENABLE_GOOGLE = () => isGeminiEnabled;
 
@@ -298,10 +298,10 @@ async function refreshApiToggles() {
       if (doc.exists) {
         const data = doc.data();
         if (data) {
-          if (data.openRouterEnabled !== undefined) isOpenRouterEnabled = data.openRouterEnabled;
+          if (data.openRouterEnabled !== undefined) isOpenRouterEnabled = false;
           if (data.groqEnabled !== undefined) isGroqEnabled = data.groqEnabled;
           if (data.geminiEnabled !== undefined) isGeminiEnabled = data.geminiEnabled;
-          if (data.deepInfraEnabled !== undefined) isDeepInfraEnabled = data.deepInfraEnabled;
+          if (data.deepInfraEnabled !== undefined) isDeepInfraEnabled = false;
         }
       } else {
         await db.collection("system_config").doc("api_toggles").set({
@@ -322,10 +322,10 @@ async function refreshApiToggles() {
           const json = await res.json();
           const fields = json.fields;
           if (fields) {
-            if (fields.openRouterEnabled && fields.openRouterEnabled.booleanValue !== undefined) isOpenRouterEnabled = fields.openRouterEnabled.booleanValue;
+            if (fields.openRouterEnabled && fields.openRouterEnabled.booleanValue !== undefined) isOpenRouterEnabled = false;
             if (fields.groqEnabled && fields.groqEnabled.booleanValue !== undefined) isGroqEnabled = fields.groqEnabled.booleanValue;
             if (fields.geminiEnabled && fields.geminiEnabled.booleanValue !== undefined) isGeminiEnabled = fields.geminiEnabled.booleanValue;
-            if (fields.deepInfraEnabled && fields.deepInfraEnabled.booleanValue !== undefined) isDeepInfraEnabled = fields.deepInfraEnabled.booleanValue;
+            if (fields.deepInfraEnabled && fields.deepInfraEnabled.booleanValue !== undefined) isDeepInfraEnabled = false;
           }
         }
       }
@@ -1331,6 +1331,42 @@ Include formulas, assumptions, relationships, and key conclusions implicitly des
 
 STEP 6: QUALITY VALIDATION
 Ensure no domain-specific information is lost (preserve formulas, units, symbols, questions).
+
+CRITICAL: FRONT FIELD FORMAT FOR ENGLISH VOCABULARY
+When the detected domain is English Vocabulary (or when processing English terms), you MUST format the "front" field exactly as follows:
+"Word/Phrase [CEFR] (Word_Form) • /IPA_Pronunciation/"
+(Note: CEFR level is optional if unknown but should be provided if possible. Word_Form is n, v, adj, adv, idiom, phrasal verb, etc.)
+Example:
+{
+  "front": "Refute [C2] (v) • /rɪˈfjuːt/",
+  "back": "Dùng lập luận chặt chẽ hoặc bằng chứng xác thực để chứng minh một ý kiến, lập luận hoặc cáo buộc là sai hoàn toàn.",
+  "example": "The lawyer spent hours trying to refute the allegations with hard evidence."
+}
+For all other domains (Mathematics, Physics, Literature, etc.), keep the "front" field as standard text (or Unicode for symbols/formulas) without this specific formatting.
+
+CRITICAL: INTENSE SEMANTIC DEFINITION ENGINE FOR VIETNAMESE MEANING
+When generating the definition/meaning field for English vocabulary, you must strictly reject shallow or literal translations.
+Concept-First Rule: Every definition must explain the underlying concept in natural, precise Vietnamese. It must answer: What does this truly mean, and what makes it distinct from its synonyms?
+Nuance & Constraints: Naturally integrate specific conditions, attitudes, intent, levels of certainty, and usage boundaries into the Vietnamese definition.
+Concrete Examples to Follow:
+Bad: "refute" -> từ chối / bác bỏ
+Good: Dùng lập luận chặt chẽ hoặc bằng chứng xác thực để chứng minh một ý kiến, lập luận hoặc cáo buộc là sai hoàn toàn.
+Bad: "infer" -> suy luận
+Good: Tự rút ra kết luận logic từ những bằng chứng, dấu hiệu hoặc dữ kiện gián tiếp đã có sẵn thay vì dựa trên lời nói trực tiếp.
+Bad: "claim" -> tuyên bố
+Good: Đưa ra một khẳng định, yêu cầu quyền lợi hoặc tuyên bố điều gì đó là sự thật nhưng chưa chắc đã được chứng minh hoặc chưa có bằng chứng xác thực.
+
+CRITICAL: MATHEMATICAL & SCIENTIFIC NOTATION (NO LATEX)
+For all mathematical, physical, or scientific subjects, you MUST NOT use LaTeX syntax (e.g., no $ signs, \\frac, \\sqrt).
+Instead, use standard Unicode math symbols for all equations and formulas to prevent structural text breaking.
+Rules:
+- Fractions: Use "/" (e.g., 1/k = 1/k1 + 1/k2)
+- Square roots: Use "√" (e.g., ω = √(k/m))
+- Greek letters: Use direct Unicode characters like ω, φ, π, Δ, ±
+- Exponents/Superscripts: Use Unicode superscripts like ², ³, ⁴ (e.g., T² = T1² + T2²)
+Example valid formats:
+"latex_equation": "1/k = 1/k1 + 1/k2"
+"latex_equation": "a = -ω² . A . cos(ωt + φ) = -ω² . x"
 `;
 
 const app = express();
@@ -1967,7 +2003,7 @@ Bọc công thức Toán/Lý/Hóa bằng LaTeX (dấu $ hoặc $$). Chỉ trả 
 
       res.setHeader("Content-Type", "text/plain");
       try {
-        const stream = CerebrasRotator.executeStream(prompt);
+        const stream = CrossProviderRotator.executeStream(prompt);
         let quotaIncremented = false;
         for await (const chunk of stream) {
           if (!quotaIncremented) {
@@ -2027,7 +2063,7 @@ BẮT BUỘC ĐỊNH DẠNG: Chỉ trả về ĐÚNG MỘT MẢNG JSON duy nhấ
 
       res.setHeader("Content-Type", "text/plain");
       try {
-        const stream = CerebrasRotator.executeStream(prompt, { responseMimeType: "application/json", temperature: 0.3 });
+        const stream = CrossProviderRotator.executeStream(prompt, { responseMimeType: "application/json", temperature: 0.3 });
         let quotaIncremented = false;
         for await (const chunk of stream) {
           if (!quotaIncremented) {
@@ -2076,7 +2112,7 @@ BẮT BUỘC ĐỊNH DẠNG: Chỉ trả về ĐÚNG MỘT MẢNG JSON duy nhấ
       let extractRetryAttempts = 0;
       while (extractRetryAttempts < 3) {
          try {
-            const extractRes = await CerebrasRotator.execute("Extract ALL text from this document comprehensively and literally. Do not summarize or explain.\\n\\n[FILE DATA CONTENT:\\n" + base64Data.substring(0, 5000) + "...]", {});
+            const extractRes = await CrossProviderRotator.execute("Extract ALL text from this document comprehensively and literally. Do not summarize or explain.\\n\\n[FILE DATA CONTENT:\\n" + base64Data.substring(0, 5000) + "...]", {});
             rawText = extractRes || "";
             break;
          } catch (err: any) {
@@ -2275,7 +2311,7 @@ ${chunkWords.join("\n")}`;
       let extractRetryAttempts = 0;
       while (extractRetryAttempts < 3) {
          try {
-            const extractRes = await CerebrasRotator.execute("Extract ALL text from this document comprehensively and literally. Do not summarize or explain.\\n\\n[FILE DATA CONTENT:\\n" + finalBase64Data.substring(0, 5000) + "...]", {});
+            const extractRes = await CrossProviderRotator.execute("Extract ALL text from this document comprehensively and literally. Do not summarize or explain.\\n\\n[FILE DATA CONTENT:\\n" + finalBase64Data.substring(0, 5000) + "...]", {});
             rawText = extractRes || "";
             break;
          } catch (err: any) {
@@ -2511,7 +2547,7 @@ ${conciseModeGuidance}`;
             
             let responseText = "";
             try {
-              responseText = await CerebrasRotator.execute(mcqPrompt, { responseMimeType: "application/json" });
+              responseText = await CrossProviderRotator.execute(mcqPrompt, { responseMimeType: "application/json" });
               if ((req as any).agentUserId) {
                 await incrementAgentQuota((req as any).agentUserId);
               }
@@ -2581,7 +2617,7 @@ ${reminderSuffix}`;
 
       res.setHeader("Content-Type", "text/plain");
       try {
-        const stream = CerebrasRotator.executeStream(contents, { systemInstruction: systemPrompt, temperature: responseMode === "direct" && responseStyle !== "detailed" ? 0.3 : 0.8, maxOutputTokens: 8192 });
+        const stream = CrossProviderRotator.executeStream(contents, { systemInstruction: systemPrompt, temperature: responseMode === "direct" && responseStyle !== "detailed" ? 0.3 : 0.8, maxOutputTokens: 8192 });
         let quotaIncremented = false;
         for await (const chunk of stream) {
           if (!quotaIncremented) {
@@ -3224,10 +3260,10 @@ app.post("/api/admin/api-toggles", express.json(), async (req, res) => {
         return res.status(403).json({ error: "Thao tác không hợp lệ. Sai admin key." });
       }
       const { groqEnabled, openRouterEnabled, geminiEnabled, deepInfraEnabled } = req.body;
-      if (openRouterEnabled !== undefined) isOpenRouterEnabled = !!openRouterEnabled;
+      if (openRouterEnabled !== undefined) isOpenRouterEnabled = false;
       if (groqEnabled !== undefined) isGroqEnabled = !!groqEnabled;
       if (geminiEnabled !== undefined) isGeminiEnabled = !!geminiEnabled;
-      if (deepInfraEnabled !== undefined) isDeepInfraEnabled = !!deepInfraEnabled;
+      if (deepInfraEnabled !== undefined) isDeepInfraEnabled = false;
       
       try {
         if (admin.apps.length > 0) {
@@ -3942,7 +3978,7 @@ Return ONLY a minified JSON object with EXACTLY these keys:
 
 Do not include markdown or explanations.`;
 
-      const responseText = await CerebrasRotator.execute(requestPrompt, { responseMimeType: "application/json", temperature: 0.1 });
+      const responseText = await CrossProviderRotator.execute(requestPrompt, { responseMimeType: "application/json", temperature: 0.1 });
 
       let cleanText = (responseText as string).trim();
       if (cleanText.startsWith("```json")) cleanText = cleanText.substring(7);
@@ -3994,7 +4030,7 @@ Return ONLY a minified JSON object with these EXACT keys:
 
 Do not include any markdown wrapper or extra text.`;
 
-      const responseText = await CerebrasRotator.execute(requestPrompt, { responseMimeType: "application/json", temperature: 0.1 });
+      const responseText = await CrossProviderRotator.execute(requestPrompt, { responseMimeType: "application/json", temperature: 0.1 });
 
       let cleanText = (responseText as string).trim();
       if (cleanText.startsWith("```json")) {
@@ -4022,9 +4058,34 @@ Do not include any markdown wrapper or extra text.`;
 
   app.post("/api/automation/manual-define", async (req, res, next) => {
     try {
-      const { front, wordForm } = req.body;
+      const { front, wordForm, mode } = req.body;
       if (!front) {
         return res.status(400).json({ error: true, message: "Thiếu từ khóa front." });
+      }
+
+      let modeInstructions = "";
+      if (mode === "vocab") {
+        modeInstructions = `
+[MODE: Tiếng Anh - Từ vựng]
+- Bắt buộc trả về phiên âm IPA chính xác.
+- Cung cấp ít nhất 1 ví dụ sinh động.
+- NGHĨA CHUYÊN SÂU: Giải thích khái niệm thực sự đằng sau từ đó (VD: thay vì nói "refute = bác bỏ", hãy nói "refute: dùng luận điểm và bằng chứng để chứng minh bên còn lại sai").
+- Xác định rõ wordform (từ loại).`;
+      } else if (mode === "error_correction") {
+        modeInstructions = `
+[MODE: Tiếng Anh - Sửa lỗi sai]
+- Chỉ ra chính xác lỗi sai trong thông tin đầu vào.
+- Giải thích điểm ngữ pháp bị sai.
+- Nêu rõ cách logic hoạt động thực sự và lý do tại sao lại như thế.`;
+      } else if (mode === "confusing_words") {
+        modeInstructions = `
+[MODE: Tiếng Anh - Phân biệt từ dễ nhầm lẫn]
+- Phân biệt các từ trong đầu vào bằng các ĐIỂM CHỦ CHỐT.
+- Giải thích rõ từ A và từ B khác nhau ở khía cạnh hoặc ngữ cảnh nào.`;
+      } else if (mode === "other_subjects") {
+        modeInstructions = `
+[MODE: Các môn học khác - Toán, Lý, Văn...]
+- BẮT BUỘC: Sử dụng ký tự Unicode thông thường để viết các công thức (ví dụ: x², √y, α, β) thay vì dùng mã LaTeX (như $x^2$, $\\sqrt{y}$) để tránh vỡ cấu trúc văn bản.`;
       }
 
       const requestPrompt = `[HENOSIS Data Enrichment Policy & Manual Define]
@@ -4038,12 +4099,17 @@ INPUT PRIORITY POLICY:
 
 ${UNIVERSAL_EXTRACTION_ENGINE_RULES}
 
+[QUY TẮC CHUNG CHO MỌI CHẾ ĐỘ]
+- Nếu đầu vào là một câu hỏi chứa các đáp án (A, B, C, D...), bạn PHẢI giải quyết nó như một bài tập bình thường: Đưa ra đáp án đúng và giải thích chi tiết, đồng thời kết hợp với các yêu cầu của chế độ hiện tại.
+${modeInstructions}
+
 Word/Phrase: ${front}
 Provided Hint/POS: ${wordForm || "unknown"}
 
 Return a STRICT JSON object representing the flashcard metadata (V3 Standard):
 {
-  "definition": "Short meaning/answer (50-70 words)",
+  "front": "Word/Phrase [CEFR] (Word_Form) • /IPA_Pronunciation/",
+  "definition": "Short meaning/answer (50-70 words) incorporating the rules above.",
   "wordForm": "Legacy field (if applicable)",
   "ipa": "/string/",
   "primaryPartOfSpeech": "Noun|Verb|Adjective...",
@@ -4057,9 +4123,9 @@ Return a STRICT JSON object representing the flashcard metadata (V3 Standard):
 - NO markdown \`\`\`json blocks.
 - Return EXACTLY ONE JSON object.`;
 
-      const responseText = await CerebrasRotator.execute(requestPrompt);
+      const responseText = await CrossProviderRotator.execute(requestPrompt);
 
-      let parsedData: any = { definition: (responseText as string).trim(), wordForm: wordForm || "" };
+      let parsedData: any = { definition: (responseText as string).trim(), wordForm: wordForm || "", front: front };
       try {
         const textToParse = (responseText as string).replace(/```json/g, '').replace(/```/g, '').trim();
         const jsonMatch = textToParse.match(/\{[\s\S]*\}/);
@@ -4067,12 +4133,13 @@ Return a STRICT JSON object representing the flashcard metadata (V3 Standard):
           const parsed = JSON.parse(jsonMatch[0]);
           if (parsed.definition) parsedData.definition = parsed.definition;
           if (parsed.wordForm) parsedData.wordForm = parsed.wordForm;
+          if (parsed.front) parsedData.front = parsed.front;
         }
       } catch (e) {
         console.warn("Failed to parse manual-define JSON fallback to raw text");
       }
 
-      return res.json({ success: true, definition: parsedData.definition, wordForm: parsedData.wordForm });
+      return res.json({ success: true, definition: parsedData.definition, wordForm: parsedData.wordForm, front: parsedData.front });
     } catch (err: any) {
       console.error("Manual Define Error:", err);
       // Let frontend handle the error explicitly.
@@ -4124,7 +4191,7 @@ CRITICAL RULES:
 RAW DATA TO PROCESS:
 ${jsonText}`;
 
-      const responseText = await CerebrasRotator.execute(requestPrompt, { responseMimeType: "application/json", temperature: 0.1 });
+      const responseText = await CrossProviderRotator.execute(requestPrompt, { responseMimeType: "application/json", temperature: 0.1 });
 
       let cleanText = (responseText as string).trim();
       if (cleanText.startsWith("```json")) {
@@ -4162,6 +4229,13 @@ ${jsonText}`;
       console.error("Automation validate-json error:", error);
       next(error);
     }
+  });
+
+  app.post("/api/log-error", express.json(), async (req, res) => {
+    const fs = await import('fs');
+    const logData = `=== FRONTEND ERROR LOG ===\nMessage: ${req.body.message}\nComponent Stack: ${req.body.componentStack}\n==========================\n`;
+    fs.appendFileSync('error.log', logData);
+    res.json({ success: true });
   });
 
   // NEW: AI LOCK ENDPOINTS FOR GRAPHICAL CLIENT CONCURRENCY SYNC
