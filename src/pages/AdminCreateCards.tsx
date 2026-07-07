@@ -114,6 +114,12 @@ export default function AdminCreateCards() {
 
   // Card Builder State
   const [front, setFront] = useState("");
+  const [analysisMode, setAnalysisMode] = useState<"auto" | "preset" | "custom">("auto");
+  const [presetType, setPresetType] = useState("Vocabulary");
+  const [customBlocks, setCustomBlocks] = useState<string[]>([]);
+  const PRESET_OPTIONS = ["Vocabulary", "Grammar", "Mathematics", "Science", "History", "Literature"];
+  const CUSTOM_BLOCK_OPTIONS = ["Core Insight", "Underlying Logic", "Origin", "Meaning", "Formula", "Timeline", "Context", "Examples", "Comparison", "Common Mistakes", "Mental Model"];
+
   const [wordForm, setWordForm] = useState("");
   const [back, setBack] = useState("");
 
@@ -140,7 +146,13 @@ export default function AdminCreateCards() {
       const res = await safeRequest("/api/automation/manual-define", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ front: front, wordForm: wordForm })
+        body: JSON.stringify({ 
+            front: front, 
+            wordForm: wordForm,
+            analysisMode,
+            presetType,
+            customBlocks
+        })
       });
       const data = await res.json();
       if (res.ok && (data.success || data.definition)) {
@@ -595,6 +607,54 @@ export default function AdminCreateCards() {
                   value={wordForm}
                   onChange={(e) => setWordForm(e.target.value)}
                 />
+              </div>
+
+              <div className="space-y-2 p-4 bg-orange-50/30 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/30 rounded-xl mb-4">
+                <label className="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-widest flex items-center gap-2">
+                  <BrainCircuit className="w-3.5 h-3.5" /> AI Analysis Engine
+                </label>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <select
+                    value={analysisMode}
+                    onChange={(e) => setAnalysisMode(e.target.value as any)}
+                    className="flex-1 p-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-orange-500/50"
+                  >
+                    <option value="auto">Auto Mode (Detect)</option>
+                    <option value="preset">Preset Category</option>
+                    <option value="custom">Custom Blocks</option>
+                  </select>
+                  
+                  {analysisMode === "preset" && (
+                    <select
+                      value={presetType}
+                      onChange={(e) => setPresetType(e.target.value)}
+                      className="flex-1 p-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-orange-500/50"
+                    >
+                      {PRESET_OPTIONS.map(p => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                  )}
+                </div>
+                
+                {analysisMode === "custom" && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {CUSTOM_BLOCK_OPTIONS.map(block => (
+                      <button
+                        type="button"
+                        key={block}
+                        onClick={() => {
+                          if (customBlocks.includes(block)) {
+                            setCustomBlocks(customBlocks.filter(b => b !== block));
+                          } else {
+                            setCustomBlocks([...customBlocks, block]);
+                          }
+                        }}
+                        className={`text-xs px-3 py-1.5 rounded-full border transition ${customBlocks.includes(block) ? 'bg-orange-500 text-white border-orange-500' : 'bg-white dark:bg-zinc-800 border-zinc-300 dark:border-zinc-600 hover:border-orange-300'}`}
+                      >
+                        {block}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-1.5">

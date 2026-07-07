@@ -29,6 +29,7 @@ import {
 } from "../utils/apiClient";
 import { AIPromptsEditorWidget } from "../components/AIPromptsEditorWidget";
 import { SystemLinksEditorWidget } from "../components/SystemLinksEditorWidget";
+import { AdminAISettings } from "../components/AdminAISettings";
 import { useSystemConfig } from "../hooks/useSystemConfig";
 
 class MonitorErrorBoundary extends React.Component<
@@ -143,7 +144,7 @@ export function ServiceMonitor({
   const [error, setError] = useState("");
   const [isPolling, setIsPolling] = useState(true);
   const [logs, setLogs] = useState<RotationLog[]>([]);
-  const [activeTab, setActiveTab] = useState<"monitor" | "logs" | "health">(
+  const [activeTab, setActiveTab] = useState<"monitor" | "logs" | "health" | "settings">(
     "monitor",
   );
   const [logFilter, setLogFilter] = useState<"all" | "429">("all");
@@ -1022,6 +1023,12 @@ export function ServiceMonitor({
           >
             System Health
           </button>
+          <button
+            onClick={() => setActiveTab("settings")}
+            className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "settings" ? "bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100" : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"}`}
+          >
+            Settings
+          </button>
         </div>
 
         <div className="mt-4 p-4 border-t border-zinc-200 dark:border-zinc-800 flex items-center gap-4 text-sm font-mono">
@@ -1668,6 +1675,10 @@ export function ServiceMonitor({
           })()}
         </div>
       );
+    }
+
+    if (activeTab === "settings") {
+      return <AdminAISettings />;
     }
 
     if (activeTab === "health") {

@@ -12,6 +12,11 @@ export interface KeyState {
   lastUsed: Date | null;
   throttleUntil?: number;
   unlockTime?: number;
+  
+  // New metrics
+  healthScore: number;
+  lastSuccess: Date | null;
+  lastFailure: Date | null;
 }
 
 export interface RotationLog {

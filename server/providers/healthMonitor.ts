@@ -10,6 +10,31 @@ export class HealthMonitor {
   static cerebrasLogs: RotationLog[] = [];
   static openRouterLogs: RotationLog[] = [];
 
+  static providerMetrics: Record<string, { totalRequests: number; successes: number; failures: number; timeouts: number; totalLatency: number }> = {
+     google: { totalRequests: 0, successes: 0, failures: 0, timeouts: 0, totalLatency: 0 },
+     cerebras: { totalRequests: 0, successes: 0, failures: 0, timeouts: 0, totalLatency: 0 },
+     openrouter: { totalRequests: 0, successes: 0, failures: 0, timeouts: 0, totalLatency: 0 }
+  };
+
+  static recordProviderLatency(provider: string, latency: number) {
+      if (this.providerMetrics[provider]) {
+          this.providerMetrics[provider].totalRequests++;
+          this.providerMetrics[provider].totalLatency += latency;
+      }
+  }
+
+  static getProviderStats(provider: string) {
+      const stats = this.providerMetrics[provider] || { totalRequests: 0, successes: 0, failures: 0, timeouts: 0, totalLatency: 0 };
+      const total = stats.totalRequests || 1;
+      return {
+          successRate: (stats.successes / total) * 100,
+          failureRate: (stats.failures / total) * 100,
+          timeoutRate: (stats.timeouts / total) * 100,
+          averageLatency: stats.totalLatency / total
+      };
+  }
+
+
   // Callback to update firestore (will be injected from server.ts)
   static firestoreSyncCallback: ((index: number, metric: "usage" | "error") => void) | null = null;
   static firestoreLogCallback: ((log: any, collection: string, docId: string) => void) | null = null;
@@ -20,7 +45,7 @@ export class HealthMonitor {
     this.openRouterKeyStates = ProviderRegistry.getKeys('openrouter').map((key, i) => this.createInitialState(key, i + 1));
   }
 
-  private static createInitialState(key: string, index: number): KeyState {
+    private static createInitialState(key: string, index: number): KeyState {
     return {
       index,
       key,
@@ -30,7 +55,10 @@ export class HealthMonitor {
       usageCount: 0,
       lastUsed: null,
       throttleUntil: 0,
-      unlockTime: 0
+      unlockTime: 0,
+      healthScore: 100,
+      lastSuccess: null,
+      lastFailure: null
     };
   }
 
@@ -42,12 +70,18 @@ export class HealthMonitor {
     }
   }
 
-  static reportUsage(provider: 'google' | 'cerebras' | 'openrouter', index: number) {
+    static reportUsage(provider: 'google' | 'cerebras' | 'openrouter', index: number, latencyMs?: number) {
+    if (latencyMs) this.recordProviderLatency(provider, latencyMs);
+    this.providerMetrics[provider].successes++;
+
     const states = this.getStates(provider);
     const state = states.find(s => s.index === index);
     if (state) {
       state.usageCount++;
       state.lastUsed = new Date();
+      state.lastSuccess = new Date();
+      state.healthScore = Math.min(100, state.healthScore + 5);
+      
       if (this.firestoreSyncCallback) {
         let offset = 0;
         if (provider === 'cerebras') offset = 200;
@@ -57,14 +91,19 @@ export class HealthMonitor {
     }
   }
 
-  static reportError(provider: 'google' | 'cerebras' | 'openrouter', index: number, is429: boolean, isFatal: boolean, errorMsg: string) {
+    static reportError(provider: 'google' | 'cerebras' | 'openrouter', index: number, is429: boolean, isFatal: boolean, errorMsg: string, isTimeout?: boolean) {
+    this.providerMetrics[provider].failures++;
+    if (isTimeout) this.providerMetrics[provider].timeouts++;
+
     const states = this.getStates(provider);
     const state = states.find(s => s.index === index);
     if (state) {
       state.errorCount++;
       state.lastUsed = new Date();
+      state.lastFailure = new Date();
+      state.healthScore = Math.max(0, state.healthScore - (isFatal ? 100 : is429 ? 10 : 20));
       
-      if (isFatal) {
+      if (isFatal || state.healthScore <= 0) {
         state.status = "HARD_LOCKED";
         state.is_banned = true;
       } else if (is429) {
@@ -77,14 +116,12 @@ export class HealthMonitor {
       } else {
         state.status = "failed";
       }
-
       this.addLog(provider, {
         id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
         timestamp: new Date().toISOString(),
         toKeyIndex: index,
         reason: errorMsg.substring(0, 100)
       });
-
       if (this.firestoreSyncCallback) {
         let offset = 0;
         if (provider === 'cerebras') offset = 200;

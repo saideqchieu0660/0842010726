@@ -386,42 +386,7 @@ export default function DocumentConverter() {
     isFreeUser: boolean;
   } | null>(null);
 
-  const fetchUserAiQuota = useCallback(async () => {
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
-
-    try {
-      const userObj = store.getCurrentUser();
-      const isFree = userObj?.role === "student" && !userObj?.isPro;
-      if (!isFree) {
-        setAiUsage({ used: 0, total: 7, isFreeUser: false });
-        return;
-      }
-
-      const userDocRef = doc(db, "users", currentUser.uid);
-      const snapshot = await getDoc(userDocRef);
-      if (snapshot.exists()) {
-        const data = snapshot.data();
-        const todayStr = new Date().toISOString().split("T")[0];
-        const lastAiUsedDate = data?.lastAiUsedDate || todayStr;
-        let aiLimitUsedToday = data?.aiLimitUsedToday || 0;
-
-        if (lastAiUsedDate !== todayStr) {
-          aiLimitUsedToday = 0;
-        }
-
-        setAiUsage({
-          used: aiLimitUsedToday,
-          total: 7,
-          isFreeUser: true,
-        });
-      } else {
-        setAiUsage({ used: 0, total: 7, isFreeUser: true });
-      }
-    } catch (err) {
-      console.error("Failed to fetch user AI quota:", err);
-    }
-  }, []);
+  const fetchUserAiQuota = () => {};
 
   useEffect(() => {
     fetchUserAiQuota();

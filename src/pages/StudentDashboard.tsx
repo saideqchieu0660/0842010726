@@ -126,6 +126,7 @@ import WeeklyStudyAnalyticsModal from "../components/WeeklyStudyAnalyticsModal";
 import { DetailedStatsModal } from "../components/DetailedStatsModal";
 import { useTheme } from "../components/ThemeProvider";
 import { InteractiveTutorial } from "../components/InteractiveTutorial";
+import { PersonalAISettings } from "../components/PersonalAISettings";
 import { EditDeckModal } from "../components/EditDeckModal";
 
 import { DeckList } from "../components/DeckList";

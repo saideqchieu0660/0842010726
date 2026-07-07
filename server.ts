@@ -1752,228 +1752,108 @@ app.post("/api/proxy/openrouter", async (req, res, next) => {
     }
   };
 
-  const agentUsageControlMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    await refreshApiToggles();
+  
+  const aiRoutingMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     let userId = req.headers["x-user-id"] as string;
+    let userRole = req.headers["x-user-role"] as string;
+
     const authHeader = req.headers["authorization"];
     if (authHeader && authHeader.startsWith("Bearer ")) {
       const idToken = authHeader.substring(7);
       const decoded = decodeFirebaseToken(idToken);
       if (decoded && decoded.user_id) {
         userId = decoded.user_id;
+        userRole = (decoded as any).role || userRole || "student";
       }
     }
 
     if (!userId) {
-      return res.status(401).json({ error: "Vui lòng đăng nhập để sử dụng tính năng này." });
+       (req as any).aiRouting = { type: 'system' };
+       return next();
     }
 
-    // 1. Check AI Busy Lock
-    const lockCheck = isAiLockedForRequest(req.path, userId);
-    if (lockCheck.busy) {
-      return res.status(503).json({
-        error: lockCheck.busy,
-        message: lockCheck.message
-      });
-    }
-
-    // 2. Fetch limits & cooldowns
-    const info = await getAgentUsageInfo(userId);
-
-    // Check Cooldown
-    if (info.cooldownRemaining > 0) {
-      return res.status(429).json({
-        error: "Cooldown active message",
-        message: `Bạn đang trong trạng thái đóng băng thời gian gọi AI (45 giây). Hãy đợi thêm ${info.cooldownRemaining} giây nữa.`,
-        cooldownRemaining: info.cooldownRemaining,
-        quotaRemaining: info.remaining
-      });
-    }
-
-    // Check Daily Quota Limit
-    if (info.remaining <= 0) {
-      return res.status(429).json({
-        error: "Daily limit reached message",
-        message: `Bạn đã dùng hết hạn mức AI miễn phí trong ngày hôm nay (${AGENT_QUOTA_LIMIT}/${AGENT_QUOTA_LIMIT} lượt). Hãy tiếp tục dùng Lõi Năng Lượng United Engine, nâng cấp tài khoản lên PRO hoặc liên hệ Giáo viên/Admin để tiếp tục sử dụng!`,
-        cooldownRemaining: 0,
-        quotaRemaining: 0
-      });
-    }
-
-    // Lock cooldown BEFORE starting to prevent concurrent bypass
-    agentCooldowns.set(userId, Date.now() + AGENT_COOLDOWN_DURATION);
-
-    // Expose headers
-    res.setHeader("X-Agent-Quota-Remaining", String(info.remaining));
-    res.setHeader("X-Agent-Cooldown-Remaining", String(45));
-
-    (req as any).agentUserId = userId;
-
-    next();
-  };
-
-  const checkAndUpdateAiQuota = async (userId: string, isPro: boolean, userRole: string): Promise<{ allowed: boolean; message?: string; used?: number }> => {
-    // Free users are those with student role and not Pro status
-    const isFreeUser = userRole === "student" && !isPro;
-    if (!isFreeUser) {
-      return { allowed: true };
-    }
-
-    if (admin.apps.length > 0) {
-      try {
-        const db = admin.firestore();
-        const userRef = db.collection("users").doc(userId);
-        const docSnap = await userRef.get();
-        
-        const todayStr = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-        let aiLimitUsedToday = 0;
-        let lastAiUsedDate = todayStr;
-
-        let unitedEngineUses = 0;
-
-        if (docSnap.exists) {
-          const data = docSnap.data();
-          lastAiUsedDate = data?.lastAiUsedDate || todayStr;
-          aiLimitUsedToday = data?.aiLimitUsedToday || 0;
-          unitedEngineUses = typeof data?.unitedEngineUses === 'number' ? data.unitedEngineUses : 0;
-          
-          if (lastAiUsedDate !== todayStr) {
-            // New day, reset quota
-            aiLimitUsedToday = 0;
-            lastAiUsedDate = todayStr;
-          }
-        }
-
-        if (aiLimitUsedToday >= AI_QUOTA_LIMIT) {
-          if (unitedEngineUses > 0) {
-            // Vượt hạn mức nhưng có lượt United Engine, trừ đi 1 lượt thay vì tăng limit
-            unitedEngineUses -= 1;
-            await userRef.set({
-              unitedEngineUses
-            }, { merge: true });
-            return { allowed: true, used: aiLimitUsedToday };
-          } else {
-            return { 
-              allowed: false, 
-              message: `Bạn đã dùng hết hạn mức AI miễn phí trong ngày hôm nay (${AI_QUOTA_LIMIT}/${AI_QUOTA_LIMIT} lượt). Hãy tiếp tục dùng Lõi Năng Lượng United Engine, nâng cấp tài khoản lên PRO hoặc liên hệ Giáo viên/Admin để tiếp tục sử dụng!`
-            };
-          }
-        }
-
-        // Tăng quá trình sử dụng thường ngày
-        aiLimitUsedToday += 1;
-        await userRef.set({
-          aiLimitUsedToday,
-          lastAiUsedDate: todayStr
-        }, { merge: true });
-
-        return { allowed: true, used: aiLimitUsedToday };
-
-      } catch (err) {
-        console.error("Error updating AI quota in Firestore:", err);
-        return { allowed: true };
-      }
-    }
-
-    return { allowed: true };
-  };
-
-  // Authenticated Robust Cooldown Filter
-  const aiCooldownMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    await refreshApiToggles();
-    let userId = req.headers["x-user-id"] as string;
-    let userRole = req.headers["x-user-role"] as string;
-    let isPro = req.headers["x-user-is-pro"] === "true";
-
-    const authHeader = req.headers["authorization"];
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-      const idToken = authHeader.substring(7);
-      const decoded = decodeFirebaseToken(idToken);
-      if (decoded && decoded.user_id) {
-        userId = decoded.user_id;
-        try {
-          const profile = await getUserProfileFromFirestore(userId, idToken);
-          if (profile.role) {
-            userRole = profile.role;
-          }
-          if (profile.isPro) {
-            isPro = true;
-          }
-        } catch (err) {
-          console.error("Failed to secure user role/pro profile:", err);
-        }
-      }
-    }
-
-    // 1. Check AI Busy Lock (to avoid overlapping and API Key exhaustion)
-    const lockCheck = isAiLockedForRequest(req.path, userId);
-    if (lockCheck.busy) {
-      return res.status(503).json({
-        error: lockCheck.busy,
-        message: lockCheck.message
-      });
-    }
-
-    // 2. Check Cooldown
-    if (userRole === "student" && userId && !isPro) {
-      const lastRequest = studentAICooldowns.get(userId);
-      const now = Date.now();
-      if (lastRequest && now - lastRequest < 10000) {
-        const timeLeft = Math.ceil((10000 - (now - lastRequest)) / 1000);
-        return res.status(429).json({
-          error: `Bạn đang trong trạng thái đóng băng thời gian gọi AI (Cooldown 10 giây). Hãy đợi thêm ${timeLeft} giây nữa.`
-        });
-      }
-      studentAICooldowns.set(userId, now);
-    }
-
-    // 3. Check and Increment AI daily Quota Limit (for free users)
-    if (userId && userRole === "student" && !isPro) {
-      const quotaCheck = await checkAndUpdateAiQuota(userId, isPro, userRole);
-      if (!quotaCheck.allowed) {
-        return res.status(429).json({
-          error: quotaCheck.message,
-          code: "AI_QUOTA_EXCEEDED"
-        });
-      }
-    }
-
-    next();
-  };
-
-
-
-
-
-  // Get current daily limit and cooldown status for Agent 2/3/Exam Generator
-  app.get("/api/agent/limits", async (req, res) => {
     try {
-      let userId = req.headers["x-user-id"] as string;
-      const authHeader = req.headers["authorization"];
-      if (authHeader && authHeader.startsWith("Bearer ")) {
-        const idToken = authHeader.substring(7);
-        const decoded = decodeFirebaseToken(idToken);
-        if (decoded && decoded.user_id) {
-          userId = decoded.user_id;
+        const settingsDoc = await db.collection("config").doc("ai_settings").get();
+        const settings = settingsDoc.exists ? settingsDoc.data() : {};
+        const trialRequests = typeof settings?.trialRequests === 'number' ? settings.trialRequests : 10;
+        
+        const userDoc = await db.collection("users").doc(userId).get();
+        const userData = userDoc.exists ? userDoc.data() : {};
+        const personalKeys = userData?.personalAiKeys || {};
+        const usedTrials = typeof userData?.usedAiTrials === 'number' ? userData.usedAiTrials : 0;
+        
+        const isAdminOrSpecial = userRole === 'admin' || userRole === 'teacher';
+        const hasTrial = usedTrials < trialRequests;
+        
+        const decrementTrial = async () => {
+            if (!isAdminOrSpecial && hasTrial) {
+                await db.collection("users").doc(userId).update({ usedAiTrials: admin.firestore.FieldValue.increment(1) }).catch(console.error);
+                await db.collection("config").doc("ai_settings").set({ totalAiRequests: admin.firestore.FieldValue.increment(1), systemApiRequests: admin.firestore.FieldValue.increment(1) }, { merge: true }).catch(console.error);
+            } else if (!isAdminOrSpecial && !hasTrial && (personalKeys.gemini || personalKeys.cerebras)) {
+                await db.collection("config").doc("ai_settings").set({ totalAiRequests: admin.firestore.FieldValue.increment(1), personalApiRequests: admin.firestore.FieldValue.increment(1) }, { merge: true }).catch(console.error);
+            }
+        };
+        
+        if (isAdminOrSpecial || hasTrial) {
+            (req as any).aiRouting = { type: 'system', onSuccess: decrementTrial };
+        } else if (personalKeys.gemini || personalKeys.cerebras) {
+            (req as any).aiRouting = { 
+                type: 'personal', 
+                geminiKey: personalKeys.gemini, 
+                cerebrasKey: personalKeys.cerebras, 
+                onSuccess: decrementTrial 
+            };
+        } else {
+            return res.status(402).json({
+                error: true,
+                code: "API_SETUP_REQUIRED",
+                message: "Bạn đã hết lượt dùng thử System API. Vui lòng thiết lập Personal API Key trong Cài đặt -> AI để tiếp tục."
+            });
         }
-      }
-      if (!userId) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-      const info = await getAgentUsageInfo(userId);
-      return res.json({
-        remaining: info.remaining,
-        cooldownRemaining: info.cooldownRemaining,
-        limitUsedToday: info.limitUsedToday,
-        limitMax: AGENT_QUOTA_LIMIT
-      });
-    } catch (err: any) {
-      return res.status(500).json({ error: err.message });
+        
+        next();
+    } catch (e) {
+        console.error("AI Routing error:", e);
+        (req as any).aiRouting = { type: 'system' };
+        next();
     }
-  });
+  };
 
-  // Agent 2: Dynamic Router Agent (Deep Extract)
-  app.post("/api/agent2/explain", agentUsageControlMiddleware, async (req, res, next) => {
+  const executeRouted = async (req: express.Request, contents: any, config?: any) => {
+      const routing = (req as any).aiRouting || { type: 'system' };
+      let res;
+      if (routing.type === 'personal') {
+          const provider = routing.geminiKey ? 'google' : 'cerebras';
+          const key = routing.geminiKey || routing.cerebrasKey;
+          res = await CrossProviderRotator.executePersonal(contents, key, provider, config);
+      } else {
+          res = await CrossProviderRotator.execute(contents, config);
+      }
+      if (routing.onSuccess) await routing.onSuccess();
+      return res;
+  };
+
+  const executeStreamRouted = async function* (req: express.Request, contents: any, config?: any) {
+      const routing = (req as any).aiRouting || { type: 'system' };
+      let stream;
+      if (routing.type === 'personal') {
+          const provider = routing.geminiKey ? 'google' : 'cerebras';
+          const key = routing.geminiKey || routing.cerebrasKey;
+          stream = CrossProviderRotator.executePersonalStream(contents, key, provider, config);
+      } else {
+          stream = CrossProviderRotator.executeStream(contents, config);
+      }
+      let successTracked = false;
+      for await (const chunk of stream) {
+          if (!successTracked && routing.onSuccess) {
+              await routing.onSuccess();
+              successTracked = true;
+          }
+          yield chunk;
+      }
+  };
+
+  app.post("/api/agent2/explain", aiRoutingMiddleware, async (req, res, next) => {
     try {
       const { term, definition, subject } = req.body;
       
@@ -2003,16 +1883,10 @@ Bọc công thức Toán/Lý/Hóa bằng LaTeX (dấu $ hoặc $$). Chỉ trả 
 
       res.setHeader("Content-Type", "text/plain");
       try {
-        const stream = CrossProviderRotator.executeStream(prompt);
-        let quotaIncremented = false;
+        const stream = executeStreamRouted(req, prompt);
+        
         for await (const chunk of stream) {
-          if (!quotaIncremented) {
-            if ((req as any).agentUserId) {
-              await incrementAgentQuota((req as any).agentUserId);
-              quotaIncremented = true;
-            }
-          }
-          res.write(chunk);
+                    res.write(chunk);
         }
         res.end();
       } catch (geminiError: any) {
@@ -2031,7 +1905,7 @@ Bọc công thức Toán/Lý/Hóa bằng LaTeX (dấu $ hoặc $$). Chỉ trả 
   });
 
   // Mock Exam Generator
-  app.post("/api/exam/generate", agentUsageControlMiddleware, async (req, res, next) => {
+  app.post("/api/exam/generate", aiRoutingMiddleware, async (req, res, next) => {
     try {
       const { decks, examType, count } = req.body;
 
@@ -2063,16 +1937,10 @@ BẮT BUỘC ĐỊNH DẠNG: Chỉ trả về ĐÚNG MỘT MẢNG JSON duy nhấ
 
       res.setHeader("Content-Type", "text/plain");
       try {
-        const stream = CrossProviderRotator.executeStream(prompt, { responseMimeType: "application/json", temperature: 0.3 });
-        let quotaIncremented = false;
+        const stream = executeStreamRouted(req, prompt, { responseMimeType: "application/json", temperature: 0.3 });
+        
         for await (const chunk of stream) {
-          if (!quotaIncremented) {
-            if ((req as any).agentUserId) {
-              await incrementAgentQuota((req as any).agentUserId);
-              quotaIncremented = true;
-            }
-          }
-          res.write(chunk);
+                    res.write(chunk);
         }
         res.end();
       } catch (geminiError: any) {
@@ -2091,7 +1959,7 @@ BẮT BUỘC ĐỊNH DẠNG: Chỉ trả về ĐÚNG MỘT MẢNG JSON duy nhấ
   });
 
   // Agent 4: Convert Document to JSON (Streaming API + Chunking)
-  app.post("/api/convert-document", aiCooldownMiddleware, async (req, res, next) => {
+  app.post("/api/convert-document", aiRoutingMiddleware, async (req, res, next) => {
     try {
       const { fileData, mimeType } = req.body;
 
@@ -2112,7 +1980,7 @@ BẮT BUỘC ĐỊNH DẠNG: Chỉ trả về ĐÚNG MỘT MẢNG JSON duy nhấ
       let extractRetryAttempts = 0;
       while (extractRetryAttempts < 3) {
          try {
-            const extractRes = await CrossProviderRotator.execute("Extract ALL text from this document comprehensively and literally. Do not summarize or explain.\\n\\n[FILE DATA CONTENT:\\n" + base64Data.substring(0, 5000) + "...]", {});
+            const extractRes = await executeRouted(req, "Extract ALL text from this document comprehensively and literally. Do not summarize or explain.\\n\\n[FILE DATA CONTENT:\\n" + base64Data.substring(0, 5000) + "...]", {});
             rawText = extractRes || "";
             break;
          } catch (err: any) {
@@ -2180,7 +2048,7 @@ ${chunkWords.join("\n")}`;
          
          while (retryAttempts < 3 && !parseSuccess) {
             try {
-               const chunkResText = await CrossProviderRotator.execute(prompt, { temperature: 0.1 });
+               const chunkResText = await executeRouted(req, prompt, { temperature: 0.1 });
                
                const chunkJsonText = chunkResText.replace(/```(?:json)?/g, "").trim();
                let chunkArr;
@@ -2260,7 +2128,7 @@ ${chunkWords.join("\n")}`;
   const chunkStore: Record<string, Buffer[]> = {};
 
   // Extract ALL text from a document to prepare for chunk-by-chunk client controlled processing
-  app.post("/api/extract-text", aiCooldownMiddleware, async (req, res, next) => {
+  app.post("/api/extract-text", aiRoutingMiddleware, async (req, res, next) => {
     try {
       const { fileData, mimeType, isChunked, chunkIndex, totalChunks, uploadId } = req.body;
 
@@ -2311,7 +2179,7 @@ ${chunkWords.join("\n")}`;
       let extractRetryAttempts = 0;
       while (extractRetryAttempts < 3) {
          try {
-            const extractRes = await CrossProviderRotator.execute("Extract ALL text from this document comprehensively and literally. Do not summarize or explain.\\n\\n[FILE DATA CONTENT:\\n" + finalBase64Data.substring(0, 5000) + "...]", {});
+            const extractRes = await executeRouted(req, "Extract ALL text from this document comprehensively and literally. Do not summarize or explain.\\n\\n[FILE DATA CONTENT:\\n" + finalBase64Data.substring(0, 5000) + "...]", {});
             rawText = extractRes || "";
             break;
          } catch (err: any) {
@@ -2337,7 +2205,7 @@ ${chunkWords.join("\n")}`;
   });
 
   // Convert a single chunk of words/lines to flashcards JSON
-  app.post("/api/convert-document-chunk", aiCooldownMiddleware, async (req, res, next) => {
+  app.post("/api/convert-document-chunk", aiRoutingMiddleware, async (req, res, next) => {
     try {
       const { chunkWords, provider } = req.body;
 
@@ -2381,7 +2249,7 @@ ${chunkWords.join("\n")}`;
 
       while (retryAttempts < 3) {
          try {
-            const chunkResText = await CrossProviderRotator.execute(prompt, { temperature: 0.1 });
+            const chunkResText = await executeRouted(req, prompt, { temperature: 0.1 });
             
             const chunkJsonText = chunkResText.replace(/```(?:json)?/g, "").trim();
             try {
@@ -2421,7 +2289,7 @@ ${chunkWords.join("\n")}`;
   });
 
     // Agent 3: Socratic & Context-Aware Assistant
-  app.post("/api/agent3/chat", agentUsageControlMiddleware, async (req, res, next) => {
+  app.post("/api/agent3/chat", aiRoutingMiddleware, async (req, res, next) => {
     try {
       const { message, history, context, mode, mcqData, difficulty, sessionId, category_context, questionCount } = req.body;
       
@@ -2547,9 +2415,9 @@ ${conciseModeGuidance}`;
             
             let responseText = "";
             try {
-              responseText = await CrossProviderRotator.execute(mcqPrompt, { responseMimeType: "application/json" });
+              responseText = await executeRouted(req, mcqPrompt, { responseMimeType: "application/json" });
               if ((req as any).agentUserId) {
-                await incrementAgentQuota((req as any).agentUserId);
+                
               }
             } catch (geminiError: any) {
               throw geminiError;
@@ -2617,16 +2485,10 @@ ${reminderSuffix}`;
 
       res.setHeader("Content-Type", "text/plain");
       try {
-        const stream = CrossProviderRotator.executeStream(contents, { systemInstruction: systemPrompt, temperature: responseMode === "direct" && responseStyle !== "detailed" ? 0.3 : 0.8, maxOutputTokens: 8192 });
-        let quotaIncremented = false;
+        const stream = executeStreamRouted(req, contents, { systemInstruction: systemPrompt, temperature: responseMode === "direct" && responseStyle !== "detailed" ? 0.3 : 0.8, maxOutputTokens: 8192 });
+        
         for await (const chunk of stream) {
-          if (!quotaIncremented) {
-            if ((req as any).agentUserId) {
-              await incrementAgentQuota((req as any).agentUserId);
-              quotaIncremented = true;
-            }
-          }
-          res.write(chunk);
+                    res.write(chunk);
         }
         res.end();
       } catch (geminiError: any) {
@@ -3554,7 +3416,7 @@ app.post("/api/admin/api-toggles", express.json(), async (req, res) => {
   });
 
   // Automated High-Performance Chunk Processor API Route
-  app.post("/api/automation/process-chunk", async (req, res, next) => {
+  app.post("/api/automation/process-chunk", aiRoutingMiddleware, async (req, res, next) => {
       const startTime = Date.now();
       let textLength = 0;
       const { textChunk, isDegraded, exactCount, targetMin, targetMax } = req.body;
@@ -3584,16 +3446,7 @@ app.post("/api/admin/api-toggles", express.json(), async (req, res) => {
           isPro = !!req.body.isPro;
         }
 
-        if (userId && userRole === "student" && !isPro) {
-          const quotaCheck = await checkAndUpdateAiQuota(userId, isPro, userRole);
-          if (!quotaCheck.allowed) {
-            return res.status(429).json({
-              error: true,
-              message: quotaCheck.message,
-              code: "AI_QUOTA_EXCEEDED"
-            });
-          }
-        }
+        
 
         let usedKeyState: any = null;
         let tokenUsageData = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
@@ -3677,7 +3530,7 @@ ${textChunk}`;
 
         const activePrompt = isJsonMode ? (isDegraded ? jsonDegradedPrompt : jsonNormalPrompt) : exactLinePrompt;
 
-        const responseTextObj = await CrossProviderRotator.execute(activePrompt, { responseMimeType: isJsonMode ? "application/json" : "text/plain", temperature: 0.1 });
+        const responseTextObj = await executeRouted(req, activePrompt, { responseMimeType: isJsonMode ? "application/json" : "text/plain", temperature: 0.1 });
 
         responseText = "";
         if (typeof responseTextObj === "string") {
@@ -3978,7 +3831,7 @@ Return ONLY a minified JSON object with EXACTLY these keys:
 
 Do not include markdown or explanations.`;
 
-      const responseText = await CrossProviderRotator.execute(requestPrompt, { responseMimeType: "application/json", temperature: 0.1 });
+      const responseText = await executeRouted(req, requestPrompt, { responseMimeType: "application/json", temperature: 0.1 });
 
       let cleanText = (responseText as string).trim();
       if (cleanText.startsWith("```json")) cleanText = cleanText.substring(7);
@@ -4030,7 +3883,7 @@ Return ONLY a minified JSON object with these EXACT keys:
 
 Do not include any markdown wrapper or extra text.`;
 
-      const responseText = await CrossProviderRotator.execute(requestPrompt, { responseMimeType: "application/json", temperature: 0.1 });
+      const responseText = await executeRouted(req, requestPrompt, { responseMimeType: "application/json", temperature: 0.1 });
 
       let cleanText = (responseText as string).trim();
       if (cleanText.startsWith("```json")) {
@@ -4058,58 +3911,59 @@ Do not include any markdown wrapper or extra text.`;
 
   app.post("/api/automation/manual-define", async (req, res, next) => {
     try {
-      const { front, wordForm, mode } = req.body;
+      const { front, wordForm, mode, analysisMode, presetType, customBlocks } = req.body;
       if (!front) {
         return res.status(400).json({ error: true, message: "Thiếu từ khóa front." });
       }
 
-      let modeInstructions = "";
-      if (mode === "vocab") {
-        modeInstructions = `
-[MODE: Tiếng Anh - Từ vựng]
-- Bắt buộc trả về phiên âm IPA chính xác.
-- Cung cấp ít nhất 1 ví dụ sinh động.
-- NGHĨA CHUYÊN SÂU: Giải thích khái niệm thực sự đằng sau từ đó (VD: thay vì nói "refute = bác bỏ", hãy nói "refute: dùng luận điểm và bằng chứng để chứng minh bên còn lại sai").
-- Xác định rõ wordform (từ loại).`;
-      } else if (mode === "error_correction") {
-        modeInstructions = `
-[MODE: Tiếng Anh - Sửa lỗi sai]
-- Chỉ ra chính xác lỗi sai trong thông tin đầu vào.
-- Giải thích điểm ngữ pháp bị sai.
-- Nêu rõ cách logic hoạt động thực sự và lý do tại sao lại như thế.`;
-      } else if (mode === "confusing_words") {
-        modeInstructions = `
-[MODE: Tiếng Anh - Phân biệt từ dễ nhầm lẫn]
-- Phân biệt các từ trong đầu vào bằng các ĐIỂM CHỦ CHỐT.
-- Giải thích rõ từ A và từ B khác nhau ở khía cạnh hoặc ngữ cảnh nào.`;
-      } else if (mode === "other_subjects") {
-        modeInstructions = `
-[MODE: Các môn học khác - Toán, Lý, Văn...]
-- BẮT BUỘC: Sử dụng ký tự Unicode thông thường để viết các công thức (ví dụ: x², √y, α, β) thay vì dùng mã LaTeX (như $x^2$, $\\sqrt{y}$) để tránh vỡ cấu trúc văn bản.`;
+      let requestPrompt = `[HENOSIS AI Analysis Engine]
+Your task is to generate complete metadata for a flashcard based on a user-provided term. The objective is deep understanding, not answer generation. Every response should remove confusion, explain the underlying logic and build lasting intuition.
+
+CORE PHILOSOPHY:
+- You are a learning companion, not a dictionary.
+- Goal: remove ambiguity, explain reasoning, build intuition, clarify misconceptions, help learners think independently.
+- Learners should finish with understanding, not merely the correct answer.
+
+TEACHING PRINCIPLES:
+- Always prioritize: removing ambiguity, explaining why, building intuition, distinguishing similar concepts, developing independent thinking.
+- Every explanation should answer: What is the core idea? Why does it work? What makes it different? Why is it commonly misunderstood?
+
+ENGLISH RULES:
+- Vocabulary: Focus on Core Insight, not dictionary definitions. Highlight the concept that distinguishes the word from similar words. Include blocks like Core Insight, Meaning, Usage, Comparison, Common Mistakes, Examples.
+- Grammar: Explain the underlying logic before formulas. Teach why the rule exists, how native speakers think, and common mistakes before introducing patterns.
+- Idioms, Collocations & Phrasal Verbs: Explain origin, historical/cultural background, meaning evolution, why the expression uses those words. Promote understanding over memorization.
+
+ADAPTIVE BLOCKS: Select blocks dynamically according to the content. Possible blocks: Core Insight, Underlying Logic, Origin, Meaning, Formula, Timeline, Context, Examples, Comparison, Common Mistakes and Mental Model. Avoid fixed templates.
+ADAPTIVE DEPTH: Do not use fixed word limits. Estimate conceptual complexity and automatically adjust explanation depth. Simple topics stay concise; complex topics deserve detailed explanations.
+MENTAL MODEL: Whenever useful, include a Mental Model using intuitive analogies, visualization or conceptual frameworks to improve long-term retention.
+UNICODE FIRST: Prefer Unicode over LaTeX for mathematics and scientific notation whenever possible (√ π α β θ Δ × ÷ ≤ ≥ ≠ ≈ → ⇒ ∑ ∫ ∞ °). Use LaTeX only when Unicode cannot accurately express advanced notation.
+
+`;
+
+      if (analysisMode === "preset") {
+         requestPrompt += `[ANALYSIS MODE: PRESET] Category: ${presetType}\n`;
+      } else if (analysisMode === "custom") {
+         requestPrompt += `[ANALYSIS MODE: CUSTOM] User selected blocks: ${customBlocks?.join(", ")}\n`;
+      } else if (mode) {
+         requestPrompt += `[ANALYSIS MODE: LEGACY PRESET] Apply logic for: ${mode}\n`;
+      } else {
+         requestPrompt += `[ANALYSIS MODE: AUTO] Detect content type, learning objective, misconceptions, required blocks and response depth automatically.\n`;
       }
 
-      const requestPrompt = `[HENOSIS Data Enrichment Policy & Manual Define]
-You are a Knowledge Enrichment Engine. 
-Your task is to generate complete metadata for a flashcard based on a user-provided term.
+      requestPrompt += `
+THINK BEFORE GENERATING:
+Before producing any output, you MUST determine and output your reasoning inside a <thought_process> XML block:
+- content type
+- learning objective
+- likely misconceptions
+- best explanation strategy
+- required blocks
+- appropriate response depth
 
-INPUT PRIORITY POLICY:
-1. MAXIMIZE use of user-provided information. NEVER overwrite valid user definitions.
-2. Generate ONLY missing metadata. Use internal knowledge first.
-3. Normalize parts of speech to standard forms (Noun, Verb, Adjective, etc.).
-
-${UNIVERSAL_EXTRACTION_ENGINE_RULES}
-
-[QUY TẮC CHUNG CHO MỌI CHẾ ĐỘ]
-- Nếu đầu vào là một câu hỏi chứa các đáp án (A, B, C, D...), bạn PHẢI giải quyết nó như một bài tập bình thường: Đưa ra đáp án đúng và giải thích chi tiết, đồng thời kết hợp với các yêu cầu của chế độ hiện tại.
-${modeInstructions}
-
-Word/Phrase: ${front}
-Provided Hint/POS: ${wordForm || "unknown"}
-
-Return a STRICT JSON object representing the flashcard metadata (V3 Standard):
+After the <thought_process> block, return a STRICT JSON object representing the flashcard metadata (V3 Standard):
 {
   "front": "Word/Phrase [CEFR] (Word_Form) • /IPA_Pronunciation/",
-  "definition": "Short meaning/answer (50-70 words) incorporating the rules above.",
+  "definition": "The deep explanation incorporating the rules above. Use HTML or Markdown for nice formatting. Do NOT wrap the JSON inside markdown blocks. Note: this field must contain the explanation and intuition directly.",
   "wordForm": "Legacy field (if applicable)",
   "ipa": "/string/",
   "primaryPartOfSpeech": "Noun|Verb|Adjective...",
@@ -4120,14 +3974,21 @@ Return a STRICT JSON object representing the flashcard metadata (V3 Standard):
   "metadataVersion": 3
 }
 
-- NO markdown \`\`\`json blocks.
-- Return EXACTLY ONE JSON object.`;
+Word/Phrase: ${front}
+Provided Hint/POS: ${wordForm || "unknown"}
+`;
 
-      const responseText = await CrossProviderRotator.execute(requestPrompt);
+      const responseText = await executeRouted(req, requestPrompt);
 
-      let parsedData: any = { definition: (responseText as string).trim(), wordForm: wordForm || "", front: front };
+      let textToParse = (responseText as string).trim();
+      
+      // Remove <thought_process> blocks
+      textToParse = textToParse.replace(/<thought_process>[\s\S]*?<\/thought_process>/g, "").trim();
+      // Remove json markdown wrapping if any
+      textToParse = textToParse.replace(/```json/g, '').replace(/```/g, '').trim();
+
+      let parsedData: any = { definition: textToParse, wordForm: wordForm || "", front: front };
       try {
-        const textToParse = (responseText as string).replace(/```json/g, '').replace(/```/g, '').trim();
         const jsonMatch = textToParse.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]);
@@ -4142,7 +4003,6 @@ Return a STRICT JSON object representing the flashcard metadata (V3 Standard):
       return res.json({ success: true, definition: parsedData.definition, wordForm: parsedData.wordForm, front: parsedData.front });
     } catch (err: any) {
       console.error("Manual Define Error:", err);
-      // Let frontend handle the error explicitly.
       return res.status(500).json({ error: true, message: err?.message || "Lỗi khi trích xuất định nghĩa." });
     }
   });
@@ -4191,7 +4051,7 @@ CRITICAL RULES:
 RAW DATA TO PROCESS:
 ${jsonText}`;
 
-      const responseText = await CrossProviderRotator.execute(requestPrompt, { responseMimeType: "application/json", temperature: 0.1 });
+      const responseText = await executeRouted(req, requestPrompt, { responseMimeType: "application/json", temperature: 0.1 });
 
       let cleanText = (responseText as string).trim();
       if (cleanText.startsWith("```json")) {

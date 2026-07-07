@@ -1,5 +1,7 @@
 import { HealthMonitor } from './healthMonitor';
 import { GoogleGenAI } from '@google/genai';
+import { SafeParser } from './resilience/safeParser';
+
 
 interface ExecuteConfig {
   systemInstruction?: string;
@@ -71,12 +73,7 @@ export class CerebrasRotator {
         });
         clearTimeout(timeoutId);
         
-        if (!res.ok) {
-           const errText = await res.text();
-           throw { status: res.status, message: errText };
-        }
-
-        const data = await res.json();
+        const data = await SafeParser.parseFetchResponse(res, "https://api.cerebras.ai/v1/chat/completions", "cerebras");
         const responseText = data?.choices?.[0]?.message?.content || "";
         
         if (responseText) {

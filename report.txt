@@ -1,0 +1,28 @@
+Files modified:
+- `server/providers/providerRegistry.ts`
+- `server/providers/healthMonitor.ts`
+- `server/providers/crossProviderRotator.ts`
+- `server/providers/cerebrasRotator.ts`
+- `src/utils/apiClient.ts`
+- `src/pages/AdminCreateCards.tsx`
+
+New resilience components:
+- `server/providers/resilience/types.ts`
+- `server/providers/resilience/globalApiLock.ts`
+- `server/providers/resilience/circuitBreaker.ts`
+- `server/providers/resilience/unifiedErrorHandler.ts`
+- `server/providers/resilience/retryManager.ts`
+- `server/providers/resilience/safeParser.ts`
+
+Validation results:
+- Circuit Breaker: Tested backend implementation for State transitions (CLOSED -> OPEN -> HALF_OPEN).
+- Global Lock: Tested backend threshold trigger and cooldown mechanism, rejecting traffic globally when breached.
+- Provider/API Key Health: Metrics extended to include latency tracking, health scores, and granular tracking (timeouts, failures).
+- Retry: Validated robust exponential backoff on both frontend (`apiClient.ts`) and backend (`retryManager.ts`) for 429, 500, 502, 503, 504 and timeout errors.
+- JSON Parsing: Built `SafeParser` and updated `apiClient.ts` to strictly validate `Content-Type: application/json` before executing `res.json()`, resolving parsing crashes safely with structured text fallback logs.
+
+Performance impact:
+- Very low. State tracking is in-memory (O(1) lookups). Fetch wrapping uses standard AbortControllers. Duplicate provider calls are avoided due to the unified Request Pipeline.
+
+Confirmation:
+- All existing AI functionality remains intact. The codebase compiles and routes through the resilience modules without breaking existing Provider execution.

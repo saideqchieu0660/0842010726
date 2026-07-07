@@ -329,28 +329,11 @@ export default function Agent3Widget() {
   };
   const [agentLimits, setAgentLimits] = useState<{ remaining: number; cooldownRemaining: number; limitUsedToday: number; limitMax: number } | null>(null);
 
-  const fetchAgentLimits = async () => {
-    if (!user) return;
-    try {
-      const idToken = await auth.currentUser?.getIdToken() || "";
-      const res = await safeRequest("/api/agent/limits", {
-        headers: {
-          "Authorization": `Bearer ${idToken}`,
-          "x-user-id": user.id
-        }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setAgentLimits(data);
-      }
-    } catch (err) {
-      console.error("Error fetching agent limits:", err);
-    }
-  };
+  
 
   useEffect(() => {
     if (isOpen) {
-      fetchAgentLimits();
+      
     }
   }, [isOpen, user]);
 
@@ -433,7 +416,7 @@ export default function Agent3Widget() {
               }
             }
             setIsLoading(false);
-            fetchAgentLimits();
+            
             return;
           }
           throw new Error(errData.message || (typeof errData.error === 'string' ? errData.error : "API Agent 3 lỗi"));
@@ -465,7 +448,7 @@ export default function Agent3Widget() {
       setMessages(prev => [...prev, { role: "ai", text: error?.message || "Tín hiệu bị nhiễu do bão mặt trời (Error 500). Vui lòng thử lại." }]);
     }
     setIsLoading(false);
-    fetchAgentLimits();
+    
   };
 
   const handleSend = () => {
@@ -530,324 +513,12 @@ export default function Agent3Widget() {
                <Bot className="w-5 h-5 animate-pulse" />
                <h3 className="font-bold tracking-tight text-zinc-950 flex items-center gap-1.5">
                  Agent 3 - Socratic Coach
-                 {agentLimits && (
-                   <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-black/15 text-zinc-950">
-                     {agentLimits.remaining}/7 lượt
-                   </span>
-                 )}
                </h3>
              </div>
              <div className="flex justify-end gap-1 items-center">
-               <button 
-                 onClick={() => {
-                   if (window.confirm("Bạn có chắc chắn muốn xóa toàn bộ lịch sử chat không?")) {
-                     const savedMode = (localStorage.getItem("agent3_response_mode") as "socratic" | "direct") || "socratic";
-                     const welcomeText = savedMode === "direct"
-                       ? "Yo! Tôi là Học giả AI trí tuệ - Trợ lý trực diện của ngài. Mời ngài đặt câu hỏi. Tôi sẽ cung cấp câu trả lời trực tiếp và cặn kẽ!"
-                       : "Yo! Tôi là Học giả AI trí tuệ - 'Socrates Coach' siêu cấp của ngài. Hôm nay muốn cày từ vựng IELTS, học lập trình ESP32 hay phân tích tâm lý học kinh tế chi không? Hãy gõ lệnh `/draw` + (chủ đề) tôi sẽ phác họa sơ đồ tư duy ngay lập tức. Mời ngài ra lệnh!";
-                     setMessages([{ role: "ai", text: welcomeText }]);
-                   }
-                 }} 
-                 className="p-1.5 rounded-full transition cursor-pointer hover:bg-black/10"
-                 title="Xóa lịch sử chat"
-               >
-                 <Trash2 className="w-4 h-4" />
-               </button>
-               <button 
-                 onClick={() => setShowSettings(!showSettings)} 
-                 className={cn("p-1.5 rounded-full transition cursor-pointer hover:bg-black/10", showSettings && "bg-black/25")}
-                 title="Cài đặt hành vi"
-               >
-                 <Settings className="w-4 h-4" />
-               </button>
-               <button onClick={() => setIsMaximized(!isMaximized)} className="hover:bg-black/10 p-1.5 rounded-full transition cursor-pointer hidden sm:block">
-                 {isMaximized ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-               </button>
-               <button onClick={() => setIsOpen(false)} className="hover:bg-black/10 p-1.5 rounded-full transition cursor-pointer"><X className="w-5 h-5" /></button>
-             </div>
-           </div>
-
-           {/* Behavior Settings Window */}
-           {showSettings && (
-             <div className="bg-orange-500/10 dark:bg-zinc-900 px-4 py-3 border-b border-zinc-200/50 dark:border-white/10 space-y-3 shrink-0 text-left animate-in slide-in-from-top duration-200">
-               <div className="flex items-center justify-between">
-                 <h4 className="text-[11px] font-extrabold uppercase text-orange-700 dark:text-orange-500 tracking-wider flex items-center gap-1.5">
-                   ⚙️ Cài đặt hành vi Agent 3
-                 </h4>
-                 <button 
-                   onClick={() => setShowSettings(false)} 
-                   className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 text-xs font-bold"
-                 >
-                   Đóng
-                 </button>
-               </div>
-               
-               <div className="space-y-3">
-                 <div className="flex flex-col gap-1">
-                   <span className="text-[10px] font-bold text-zinc-600 dark:text-zinc-300">
-                     Độ chi tiết:
-                   </span>
-                   <div className="grid grid-cols-3 gap-1 bg-zinc-200/55 dark:bg-zinc-800 p-0.5 rounded-lg border border-zinc-300/30">
-                     <button
-                       onClick={() => handleToggleResponseLength("concise")}
-                       className={cn(
-                         "py-1 rounded text-[10px] font-bold transition-all cursor-pointer",
-                         responseLength === "concise"
-                           ? "bg-orange-500 text-black shadow-xs"
-                           : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-                       )}
-                       title="Súc tích - Trả lời 1-3 câu siêu ngắn gọn"
-                     >
-                       Súc tích
-                     </button>
-                     <button
-                       onClick={() => handleToggleResponseLength("detailed")}
-                       className={cn(
-                         "py-1 rounded text-[10px] font-bold transition-all cursor-pointer",
-                         responseLength === "detailed"
-                           ? "bg-orange-500 text-black shadow-xs"
-                           : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-                       )}
-                       title="Chi tiết - Giải thích 200-300 chữ kèm ví dụ"
-                     >
-                       Chi tiết
-                     </button>
-                     <button
-                       onClick={() => handleToggleResponseLength("super_detailed")}
-                       className={cn(
-                         "py-1 rounded text-[10px] font-bold transition-all cursor-pointer",
-                         responseLength === "super_detailed"
-                           ? "bg-orange-500 text-black shadow-xs"
-                           : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-                       )}
-                       title="Siêu chi tiết - Phân tích sâu sắc cặn kẽ 100%"
-                     >
-                       Siêu chi tiết
-                     </button>
-                   </div>
-                 </div>
-
-                 
-               </div>
-             </div>
-           )}
-
-          {/* Mode Switcher Bar */}
-          <div className="bg-zinc-100 dark:bg-zinc-900 px-4 py-2 border-b border-zinc-200/50 dark:border-white/10 flex justify-between items-center shrink-0 text-left">
-            <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
-              Chế độ trả lời:
-            </span>
-            <div className="flex bg-zinc-200/60 dark:bg-zinc-800/80 p-0.5 rounded-lg border border-zinc-300/30">
-              <button
-                onClick={() => handleToggleResponseMode("auto")}
-                className={cn(
-                  "px-2 py-1 rounded text-[10px] font-bold transition-all cursor-pointer",
-                  responseMode === "auto"
-                    ? "bg-purple-500 text-white shadow-xs"
-                    : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-                )}
-                title="Tự động (Auto) - Tier 1 Router sẽ phân tích ngữ cảnh"
-              >
-                Auto 🧠
-              </button>
-              <button
-                onClick={() => handleToggleResponseMode("socratic")}
-                className={cn(
-                  "px-2 py-1 rounded text-[10px] font-bold transition-all cursor-pointer",
-                  responseMode === "socratic"
-                    ? "bg-orange-500 text-black shadow-xs"
-                    : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-                )}
-                title="Gợi mở (Socrates) - Đặt câu hỏi gợi ý để bạn tự suy luận"
-              >
-                Gợi mở 🤔
-              </button>
-              <button
-                onClick={() => handleToggleResponseMode("direct")}
-                className={cn(
-                  "px-2 py-1 rounded text-[10px] font-bold transition-all cursor-pointer",
-                  responseMode === "direct"
-                    ? "bg-orange-500 text-black shadow-xs"
-                    : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-                )}
-                title="Trực diện (Direct) - Trả lời thẳng vào câu hỏi trực tiếp"
-              >
-                Trực diện ⚡
-              </button>
-              <button
-                onClick={() => handleToggleResponseMode("debate")}
-                className={cn(
-                  "px-2 py-1 rounded text-[10px] font-bold transition-all cursor-pointer",
-                  responseMode === "debate"
-                    ? "bg-orange-500 text-black shadow-xs"
-                    : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-                )}
-                title="Tranh biện (Debate) - Đóng vai phản biện sắc bén"
-              >
-                Tranh biện ⚔️
-              </button>
-            </div>
-          </div>
-          
-          <div className="flex-1 min-h-0 relative overflow-y-auto p-4 space-y-4 bg-zinc-50/90 dark:bg-zinc-950/40 sm:bg-transparent sm:dark:bg-transparent">
-             <AnimatePresence>
-             {messages.map((m, i) => (
-                <motion.div 
-                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  key={i} 
-                  className={cn(
-                    "flex flex-col gap-1 max-w-[85%] relative z-10",
-                    m.role === "user" ? "ml-auto items-end" : "mr-auto items-start"
-                  )}
-                >
-                  <div className={cn(
-                    "p-3 rounded-xl break-words transition-all duration-300 relative z-10 w-full", 
-                    m.role === "user" ? "bg-orange-500/30 dark:bg-orange-500/20 rounded-tr-none text-zinc-900 dark:text-zinc-100" : "bg-zinc-200/50 dark:bg-white/10 rounded-tl-none text-zinc-800 dark:text-zinc-200",
-                    isMaximized ? "text-lg" : "text-sm"
-                  )}>
-                     <ReactMarkdown 
-                       remarkPlugins={[remarkMath]} 
-                       rehypePlugins={[rehypeKatex]}
-                       components={{
-                         code({ className, children, ...props }: any) {
-                           const match = /language-(\w+)/.exec(className || '');
-                           const codeContent = String(children).replace(/\n$/, '');
-                           const isMermaid = (match && match[1] === 'mermaid') || codeContent.trim().startsWith('mindmap') || codeContent.trim().startsWith('graph ') || codeContent.trim().startsWith('flowchart ');
-                           if (isMermaid) {
-                             return <MermaidRenderer code={codeContent} onAddCard={handleQuickAddNode} />;
-                           }
-                           return (
-                             <code className={cn(className, "bg-zinc-100 dark:bg-zinc-900 rounded px-1.5 py-0.5 font-mono text-xs text-orange-600 dark:text-orange-400")} {...props}>
-                               {children}
-                             </code>
-                           );
-                         }
-                       }}
-                     >
-                       {preprocessMessageText(m.text)}
-                     </ReactMarkdown>
-                  </div>
-                  {m.role === "ai" && (
-                    <button
-                      onClick={() => handleSaveToSetClicked(m.text, i)}
-                      className="text-[11px] text-orange-600 dark:text-orange-400 font-extrabold flex items-center gap-1 mt-1 hover:underline self-start pl-1 cursor-pointer transition duration-200"
-                    >
-                      <Plus className="w-3 h-3" /> Thêm vào bộ thẻ
-                    </button>
-                  )}
-                </motion.div>
-             ))}
-             </AnimatePresence>
-             
-             <AnimatePresence>
-             {isLoading && (
-                <motion.div 
-                   initial={{ opacity: 0, y: 10 }}
-                   animate={{ opacity: 1, y: 0 }}
-                   exit={{ opacity: 0, scale: 0.9, y: 5 }}
-                   className="bg-zinc-200/50 dark:bg-white/10 p-3 rounded-xl rounded-tl-none w-fit relative z-10"
-                >
-                   <div className="flex gap-1.5 h-4 items-center justify-center">
-                      <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0 }} className="w-1.5 h-1.5 bg-orange-500 rounded-full"></motion.div>
-                      <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0.15 }} className="w-1.5 h-1.5 bg-orange-500 rounded-full"></motion.div>
-                      <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0.3 }} className="w-1.5 h-1.5 bg-orange-500 rounded-full"></motion.div>
-                   </div>
-                </motion.div>
-             )}
-             </AnimatePresence>
-             
-             {/* Glassmorphic Placeholder State for Cooldown Energy Charging */}
-             {cooldownRemaining > 0 && (
-                <div className="absolute inset-0 z-20 bg-zinc-50/40 dark:bg-zinc-950/40 backdrop-blur-sm transition-all duration-500 flex flex-col items-center justify-center p-4">
-                   <div className="glass px-6 py-4 flex flex-col items-center gap-3 animate-in zoom-in-95 duration-300 border border-orange-500/20">
-                     <div className="relative w-12 h-12 flex items-center justify-center">
-                        <div className="absolute inset-0 border-4 border-orange-500/20 rounded-full"></div>
-                        <svg className="absolute inset-0 w-12 h-12 -rotate-90" viewBox="0 0 100 100">
-                          <circle cx="50" cy="50" r="46" fill="transparent" stroke="currentColor" strokeWidth="8" strokeDasharray="289" strokeDashoffset={289 - (289 * (10 - cooldownRemaining)) / 10} className="text-orange-500 transition-all duration-1000 ease-linear" />
-                        </svg>
-                        <Bot className="w-5 h-5 text-orange-500 animate-pulse relative z-10" />
-                     </div>
-                     <span className="font-medium text-sm text-zinc-900 dark:text-zinc-100 italic font-sans flex items-center gap-1.5"><Flame className="w-4 h-4 text-orange-500" /> Sạc năng lượng hệ thống...</span>
-                   </div>
-                </div>
-             )}
-             
-             <div ref={messagesEndRef} className="h-4 w-full" />
-          </div>
-
-          <div className="p-4 sm:p-3 border-t border-zinc-200/50 dark:border-white/10 bg-zinc-100/90 dark:bg-zinc-900/60 sm:bg-zinc-50/50 sm:dark:bg-white/5 sticky bottom-0 pb-8 sm:pb-3 shrink-0">
-            <div className="flex gap-2 items-center bg-zinc-200/40 dark:bg-zinc-800/40 border border-zinc-300/60 dark:border-zinc-700/60 rounded-xl px-2.5 py-1.5 shadow-inner focus-within:ring-2 focus-within:ring-orange-500/50 focus-within:border-orange-500 transition-all">
-              <input 
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && handleSend()}
-                disabled={cooldownRemaining > 0}
-                placeholder={cooldownRemaining > 0 ? `Chờ ${cooldownRemaining}s...` : "Hỏi Gia sư Socrates..."}
-                className={cn(
-                  "flex-1 bg-transparent border-none focus:outline-none text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 transition-all duration-300 min-w-0",
-                  cooldownRemaining > 0 && "opacity-50 cursor-not-allowed",
-                  isMaximized ? "text-lg py-1" : "text-sm py-0.5"
-                )}
-              />
-              <button 
-                onClick={handleSend}
-                disabled={isLoading || !input.trim() || cooldownRemaining > 0}
-                className="p-1.5 bg-orange-500 text-black rounded-lg disabled:opacity-50 hover:bg-orange-600 transition cursor-pointer flex items-center justify-center shrink-0 w-8 h-8"
-                title={cooldownRemaining > 0 ? `Đang trong cooldown 10s (Còn lại ${cooldownRemaining}s)` : "Gửi"}
-              >
-                {cooldownRemaining > 0 ? (
-                  <span className="text-[10px] font-black font-mono text-zinc-900">{cooldownRemaining}s</span>
-                ) : (
-                  <Send className="w-3.5 h-3.5" />
-                )}
-              </button>
-            </div>
-          </div>
-        </motion.div>
-        </>
-      )}
-      </AnimatePresence>
-
-      {isSaveModalOpen && (
-        <div className="fixed inset-0 bg-zinc-900/60 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[60] animate-in fade-in">
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl max-w-md w-full shadow-2xl border border-zinc-200 dark:border-zinc-800 p-6 flex flex-col space-y-4 animate-in zoom-in-95 relative text-left">
-            <button 
-              onClick={() => setIsSaveModalOpen(false)}
-              className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <h3 className="text-lg font-display font-black text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
-              <Plus className="w-5 h-5 text-orange-500" /> Thêm thẻ học mới
-            </h3>
-
-            {saveErrorMsg && (
-              <div className="p-3 bg-red-500/10 text-red-600 dark:text-red-400 text-xs rounded-xl border border-red-500/20 font-medium">
-                ⚠️ {saveErrorMsg}
-              </div>
-            )}
-
-            {saveSuccessMsg && (
-              <div className="p-3 bg-green-500/10 text-green-600 dark:text-green-400 text-xs rounded-xl border border-green-500/20 font-medium">
-                {saveSuccessMsg}
-              </div>
-            )}
-
-            {/* Toggle Tab chuyển đổi giữa thêm vào bộ sẵn có và tạo bộ mới */}
-            <div className="flex bg-zinc-100 dark:bg-zinc-800/40 p-1 rounded-xl gap-1 border border-zinc-200/55 dark:border-zinc-850">
               <button
                 type="button"
-                onClick={() => {
-                  if (existingSets.length > 0) {
-                    setIsCreateNewSet(false);
-                  } else {
-                    if (typeof window !== 'undefined') {
-                      window.dispatchEvent(new CustomEvent('toast-dispatch', { detail: "Ngài chưa có bộ thẻ học cá nhân nào! Hãy dùng tùy chọn 'Tạo Bộ Mới Tinh' bên dưới nhé." }));
-                    }
-                  }
-                }}
+                onClick={() => setIsCreateNewSet(false)}
                 className={cn(
                   "flex-1 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer",
                   !isCreateNewSet 
@@ -1128,8 +799,10 @@ export default function Agent3Widget() {
               </button>
             </div>
           </div>
-        </div>
+        </motion.div>
+        </>
       )}
+      </AnimatePresence>
     </>
   );
 }
