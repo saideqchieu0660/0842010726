@@ -1,6 +1,5 @@
 console.log("Initializing API Server...");
 import { ProviderManager } from "./server/providers/providerManager";
-const db = admin.firestore();
 import { HealthMonitor } from "./server/providers/healthMonitor";
 import { CerebrasRotator } from "./server/providers/cerebrasRotator";
 import { CrossProviderRotator } from "./server/providers/crossProviderRotator";
@@ -21,12 +20,16 @@ import os from "os";
 import { GoogleGenAI } from "@google/genai";
 import { google } from "googleapis";
 import dotenv from "dotenv";
+import admin from 'firebase-admin';
+const db = admin.firestore();
+
+
 
 dotenv.config();
 console.log("Environment configuration loaded.");
 
 // --- DEFENSIVE BOOT STRAPPING MECHANISM ---
-import admin from 'firebase-admin';
+
 
 export function sanitizeJsonString(str: string): string {
   let clean = str.trim();
