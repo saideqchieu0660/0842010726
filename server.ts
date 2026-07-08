@@ -1,5 +1,6 @@
 console.log("Initializing API Server...");
 import { ProviderManager } from "./server/providers/providerManager";
+import { db } from './db';
 import { HealthMonitor } from "./server/providers/healthMonitor";
 import { CerebrasRotator } from "./server/providers/cerebrasRotator";
 import { CrossProviderRotator } from "./server/providers/crossProviderRotator";
